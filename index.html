@@ -361,6 +361,20 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
   .nav-links{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -240px; /* Hidden by default */
+    background: var(--black);
+    z-index: 1000;
+    width: 220px;
+    transition: left 0.3s ease;
+  }
+  .sidebar.open { left: 0; }
+  .app-layout { grid-template-columns: 1fr; }
+  .mobile-only { display: block !important; }
+}
+.mobile-only { display: none; }
 </style>
 </head>
 <body>
@@ -379,9 +393,12 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
     <span class="nav-link" id="nl-dash" onclick="showSection('dashboard')">Driver Hub</span>
   </div>
   <div class="nav-right">
-    <button class="notif-btn" onclick="showSection('notifications')">🔔<span class="notif-dot" id="ndot"></span></button>
-    <button class="btn btn-outline btn-sm" onclick="showSection('profile')">👤 Profile</button>
-    <button class="btn btn-red btn-sm" id="auth-btn" onclick="openAuthModal()">Sign In</button>
+    <button class="notif-btn" onclick="showPage('notifications')">
+      🔔<span class="notif-dot hidden" id="ndot"></span>
+    </button>
+    <button class="btn btn-outline btn-sm hidden" id="nav-logout" onclick="_fb.signOut(_fb.auth)">Logout</button>
+    <button class="btn btn-red btn-sm" id="nav-auth-btn" onclick="openModal('auth-modal')">Login</button>
+    <button class="btn btn-ghost mobile-only" id="menu-toggle" style="font-size:1.5rem; padding:0 0.5rem;">☰</button>
   </div>
 </nav>
 
@@ -972,29 +989,29 @@ const DIST = {
 // ════════════════════════════════════════
 
 function updateNavForUser(user) {
-  const btn = $('auth-btn');
-  const banner = $('verify-banner');
-  if (!btn) return;
+  const authBtn = $('nav-auth-btn');
+  const logoutBtn = $('nav-logout');
   if (user) {
-    const name = user.displayName || user.email.split('@')[0];
-    btn.textContent = name.split(' ')[0];
-    btn.onclick = () => showSection('profile');
-    btn.className = 'btn btn-outline btn-sm';
-    const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-    if (!user.emailVerified && !isGoogle) {
-      banner.classList.remove('hidden');
-      const txt = $('verify-email-txt');
-      if (txt) txt.textContent = user.email;
-    } else {
-      banner.classList.add('hidden');
-    }
+    authBtn.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
   } else {
-    btn.textContent = 'Sign In';
-    btn.onclick = openAuthModal;
-    btn.className = 'btn btn-red btn-sm';
-    if (banner) banner.classList.add('hidden');
+    authBtn.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+    showPage('landing');
   }
 }
+
+// Mobile Menu Toggle Logic
+document.getElementById('menu-toggle').addEventListener('click', () => {
+  document.querySelector('.sidebar').classList.toggle('open');
+});
+
+// Close sidebar when a link is clicked
+document.querySelectorAll('.sb-link').forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
 
 // ════════════════════════════════════════
 //  AUTH — SIGN UP
@@ -2137,6 +2154,10 @@ function showToast(msg,type=''){
   setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3800);
 }
 
+// ════════════════════════════════════════
+//  FIREBASE MODULE AUTH STATE WIRING
+//  (called from the type="module" script above)
+// ════════════════════════════════════════
 
 window.updateNavForUser = updateNavForUser;
 window.loadUserProfile = loadUserProfile;
