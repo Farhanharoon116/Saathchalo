@@ -586,7 +586,7 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
             <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">👤 Your Details</div>
             <div class="fg2">
               <div class="field"><label>Your Name (shown to passengers)</label><input type="text" id="o-name" placeholder="e.g. Ahmed K."/></div>
-              <div class="field"><label>WhatsApp Number</label><input type="tel" id="o-wa" placeholder="03XX-XXXXXXX"/></div>
+              <div class="field"><label>WhatsApp Number</label><input type="tel" id="o-wa" placeholder="0302-2373116"/></div>
             </div>
             <button class="btn btn-red btn-full" onclick="submitOffer()">Post My Ride →</button>
           </div>
@@ -965,7 +965,7 @@ const FB = () => window._fb;
 
 // ── STATIC SAMPLE RIDES (shown before Firestore loads) ──
 const SAMPLE_RIDES = [
-  {id:'s1',init:'A',name:'Ahmed K.',color:'#E8380D',tc:'#fff',vtype:'car',from:'PECHS',to:'I.I. Chundrigar (Downtown)',time:'8:00 AM',car:'Honda City',ml:13,seats:2,total:2,cost:95,tags:['Daily','Verified','AC','Car'],prefs:['AC','No Smoking'],phone:'03121234567',rating:4.9,trips:26,joined:'Jan 2026',plate:'KHI-4521',about:'Office commuter going downtown daily. Non-smoker, light music only.',isDemo:true},
+  {id:'s1',init:'A',name:'Ahmed K.',color:'#E8380D',tc:'#fff',vtype:'car',from:'PECHS',to:'I.I. Chundrigar (Downtown)',time:'8:00 AM',car:'Honda City',ml:13,seats:2,total:2,cost:95,tags:['Daily','Verified','AC','Car'],prefs:['AC','No Smoking'],phone:'03022373116',rating:4.9,trips:26,joined:'Jan 2026',plate:'KHI-4521',about:'Office commuter going downtown daily. Non-smoker, light music only.',isDemo:true},
   {id:'s2',init:'S',name:'Sara M.',color:'#2ECC71',tc:'#0D0D0D',vtype:'car',from:'Gulshan-e-Iqbal',to:'IBA Karachi',time:'7:45 AM',car:'Suzuki Swift',ml:12,seats:1,total:1,cost:110,tags:['Mon–Fri','Female Driver','Verified','Car'],prefs:['Female Only','AC'],phone:'03211234567',rating:4.8,trips:18,joined:'Feb 2026',plate:'KHI-7890',about:'University lecturer at IBA. Female passengers preferred.',isDemo:true},
   {id:'s3',init:'B',name:'Bilal R.',color:'#3B82F6',tc:'#fff',vtype:'car',from:'Defence (DHA)',to:'Shaheed-e-Millat Road',time:'8:30 AM',car:'Toyota Corolla',ml:14,seats:3,total:3,cost:130,tags:['Daily','AC','Verified','Car'],prefs:['AC','Music OK'],phone:'03331234567',rating:4.7,trips:34,joined:'Dec 2025',plate:'KHI-2233',about:'Software engineer commuting daily. Music allowed, clean car.',isDemo:true},
   {id:'s4',init:'F',name:'Fatima A.',color:'#9B59B6',tc:'#fff',vtype:'car',from:'Clifton',to:'NUCES FAST',time:'7:30 AM',car:'Suzuki Alto',ml:15,seats:2,total:2,cost:80,tags:['Mon–Fri','Students','Female Driver','Car'],prefs:['Students','No Smoking'],phone:'03001234567',rating:5.0,trips:12,joined:'Mar 2026',plate:'KHI-5566',about:'CS student at FAST. Looking for fellow students going same way.',isDemo:true},
