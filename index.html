@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet"/>
 <!-- Firebase SDK v10 -->
 <script type="module" id="firebase-app-script">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
          signInWithPopup, GoogleAuthProvider, sendEmailVerification,
@@ -18,13 +19,14 @@ import { getFirestore, collection, addDoc, getDocs, getDoc, doc,
          serverTimestamp, increment, arrayUnion }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyD-PSOylIfxWS2iFCEKbcsLo8oH9C73UGA",
-  authDomain:        "saathchalo-71843.firebaseapp.com",
-  projectId:         "saathchalo-71843",
-  storageBucket:     "saathchalo-71843.firebasestorage.app",
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyD-PSOylIfxWS2iFCEKbcsLo8oH9C73UGA",
+  authDomain: "saathchalo-71843.firebaseapp.com",
+  projectId: "saathchalo-71843",
+  storageBucket: "saathchalo-71843.firebasestorage.app",
   messagingSenderId: "1083497535808",
-  appId:             "1:1083497535808:web:337411b7464d214ff982a5"
+  appId: "1:1083497535808:web:337411b7464d214ff982a5"
 };
 
 const app  = initializeApp(firebaseConfig);
@@ -33,7 +35,7 @@ const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// ── EXPOSE TO GLOBAL SCOPE (used by non-module functions) ──
+
 window._fb = { auth, db, googleProvider,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithPopup, sendEmailVerification, sendPasswordResetEmail,
@@ -42,7 +44,6 @@ window._fb = { auth, db, googleProvider,
   updateDoc, query, where, orderBy, onSnapshot,
   serverTimestamp, increment, arrayUnion };
 
-// ── AUTH STATE LISTENER ──
 onAuthStateChanged(auth, (user) => {
   window._currentUser = user || null;
   updateNavForUser(user);
@@ -586,7 +587,7 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
             <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">👤 Your Details</div>
             <div class="fg2">
               <div class="field"><label>Your Name (shown to passengers)</label><input type="text" id="o-name" placeholder="e.g. Ahmed K."/></div>
-              <div class="field"><label>WhatsApp Number</label><input type="tel" id="o-wa" placeholder="0302-2373116"/></div>
+              <div class="field"><label>WhatsApp Number</label><input type="tel" id="o-wa" placeholder="03XX-XXXXXXX"/></div>
             </div>
             <button class="btn btn-red btn-full" onclick="submitOffer()">Post My Ride →</button>
           </div>
@@ -611,73 +612,17 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
 
       <!-- MY RIDES -->
       <div id="ap-myrides" class="ap-section">
-        <div class="page-hdr"><div><div class="page-title">My Rides</div><div class="page-sub">Driver and passenger history</div></div></div>
+        <div class="page-hdr"><div><div class="page-title">My Rides</div><div class="page-sub" id="myrides-sub">Loading…</div></div>
+          <button class="btn btn-red btn-sm" onclick="showSection('offer')">+ Offer New Ride</button>
+        </div>
         <div class="mr-tabs">
-          <button class="mr-tab active" id="mrt-offered" onclick="switchMyTab('offered')">Offered (3)</button>
-          <button class="mr-tab" id="mrt-joined" onclick="switchMyTab('joined')">Joined (2)</button>
-          <button class="mr-tab" id="mrt-history" onclick="switchMyTab('history')">History (8)</button>
+          <button class="mr-tab active" id="mrt-offered" onclick="switchMyTab('offered')">Offered <span id="mrt-offered-count"></span></button>
+          <button class="mr-tab" id="mrt-joined" onclick="switchMyTab('joined')">Joined <span id="mrt-joined-count"></span></button>
+          <button class="mr-tab" id="mrt-history" onclick="switchMyTab('history')">History</button>
         </div>
-        <div id="my-offered">
-          <div class="mrc">
-            <div class="mrc-hdr"><div><div class="mrc-route">PECHS → I.I. Chundrigar (Downtown)</div><div class="mrc-meta">Mon–Fri · 8:00 AM · Honda City · 13 km/L</div></div><span class="badge badge-green">Active</span></div>
-            <div class="mrc-body">
-              <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:.35rem">Passengers (2/2 seats filled)</div><div class="pchips"><div class="pchip"><div class="pchip-dot" style="background:var(--green)"></div>Sara M.</div><div class="pchip"><div class="pchip-dot" style="background:var(--green)"></div>Bilal A.</div></div></div>
-              <div style="text-align:right"><div class="earn-val">Rs.146<span style="font-size:.75rem;font-family:var(--fb);color:var(--muted)">/day</span></div><div class="earn-lbl">You collect</div><div style="font-size:.72rem;color:var(--muted);margin-top:.2rem">~Rs.3,504/month</div></div>
-            </div>
-            <div class="mrc-actions">
-              <button class="btn btn-outline btn-sm" onclick="showSection('active')">🟢 View Live Ride</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('WhatsApp group link copied!')">📱 Share WA Link</button>
-              <button class="btn btn-outline btn-sm" onclick="showSection('dashboard')">📊 Manage Requests</button>
-              <button class="btn-ghost btn-sm" onclick="showToast('Ride paused. Passengers notified.','info')">⏸ Pause Route</button>
-              <button class="btn-ghost btn-sm" onclick="showToast('Ride deleted.','err')">🗑 Delete</button>
-            </div>
-          </div>
-          <div class="mrc">
-            <div class="mrc-hdr"><div><div class="mrc-route">PECHS → Karachi University</div><div class="mrc-meta">Sat · 9:00 AM · Honda City · 1 seat available</div></div><span class="badge badge-yellow">1 Pending Request</span></div>
-            <div class="mrc-body">
-              <div><div style="font-size:.75rem;color:var(--muted);margin-bottom:.35rem">Awaiting your response</div><div class="pchips"><div class="pchip"><div class="pchip-dot" style="background:var(--yellow)"></div>Zain R. ⏳ Pending</div></div></div>
-              <div style="text-align:right"><div class="earn-val">Rs.85</div><div class="earn-lbl">Per seat</div></div>
-            </div>
-            <div class="mrc-actions">
-              <button class="btn btn-green btn-sm" onclick="acceptRequest('Zain R.')">✓ Accept Zain</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Zain R. request declined.','err')">✕ Decline</button>
-              <button class="btn-ghost btn-sm" onclick="openRateModal()">View Profile</button>
-            </div>
-          </div>
-          <div class="mrc" style="opacity:.55">
-            <div class="mrc-hdr"><div><div class="mrc-route">PECHS → NUCES FAST</div><div class="mrc-meta">Draft · Not yet posted</div></div><span class="badge badge-muted">Draft</span></div>
-            <div class="mrc-actions"><button class="btn btn-red btn-sm" onclick="showSection('offer')">✏️ Edit & Post</button><button class="btn-ghost btn-sm" onclick="showToast('Draft deleted.','err')">🗑 Delete</button></div>
-          </div>
-        </div>
-        <div id="my-joined" class="hidden">
-          <div class="mrc">
-            <div class="mrc-hdr"><div><div class="mrc-route">Gulshan-e-Iqbal → IBA Karachi</div><div class="mrc-meta">Mon–Fri · 7:45 AM · Suzuki Swift · Sara M. driving</div></div><span class="badge badge-green">Confirmed</span></div>
-            <div class="mrc-body"><div><div style="font-size:.8rem;color:var(--muted)">Your share: <strong style="color:var(--green)">Rs.110/trip</strong> · ~Rs.2,640/month</div></div><div style="text-align:right"><div class="earn-val" style="color:var(--green)">Rs.110</div><div class="earn-lbl">You pay/trip</div></div></div>
-            <div class="mrc-actions">
-              <button class="btn btn-outline btn-sm" onclick="showSection('active')">🟢 Track Ride</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Sara M. notified via WhatsApp!','info')">📱 WhatsApp Sara</button>
-              <button class="btn-ghost btn-sm" onclick="openRateModal()">⭐ Rate Driver</button>
-              <button class="btn-ghost btn-sm" onclick="showToast('Left ride. Sara notified.','err')">✕ Leave Ride</button>
-            </div>
-          </div>
-          <div class="mrc">
-            <div class="mrc-hdr"><div><div class="mrc-route">PECHS → NED University</div><div class="mrc-meta">Thu · 8:15 AM · Honda Civic · Zaid H. driving</div></div><span class="badge badge-yellow">Pending Approval</span></div>
-            <div class="mrc-body"><div><div style="font-size:.8rem;color:var(--muted)">Waiting for Zaid to accept. You'll get an SMS notification.</div></div><div style="text-align:right"><div class="earn-val">Rs.70</div><div class="earn-lbl">Cost/trip</div></div></div>
-            <div class="mrc-actions"><button class="btn-ghost btn-sm" onclick="showToast('Request cancelled.','err')">✕ Cancel Request</button></div>
-          </div>
-        </div>
-        <div id="my-history" class="hidden">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-            ${[
-              {route:'PECHS → I.I. Chundrigar',date:'Apr 1, 2026',role:'Driver',cost:'Rs.146',rating:5},
-              {route:'PECHS → I.I. Chundrigar',date:'Mar 31, 2026',role:'Driver',cost:'Rs.146',rating:5},
-              {route:'Gulshan → IBA Karachi',date:'Mar 28, 2026',role:'Passenger',cost:'Rs.110',rating:4},
-              {route:'PECHS → NUCES FAST',date:'Mar 25, 2026',role:'Driver',cost:'Rs.160',rating:5},
-              {route:'Defence → Saddar',date:'Mar 20, 2026',role:'Passenger',cost:'Rs.95',rating:5},
-              {route:'PECHS → I.I. Chundrigar',date:'Mar 18, 2026',role:'Driver',cost:'Rs.146',rating:4},
-            ].map(h=>`<div class="mrc" style="margin:0"><div class="mrc-hdr"><div><div class="mrc-route" style="font-size:.85rem">${h.route}</div><div class="mrc-meta">${h.date} · ${h.role}</div></div><span class="badge badge-muted">Done</span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem"><div style="font-family:var(--fd);font-size:1rem;color:var(--green)">${h.cost}</div><div class="stars">${'★'.repeat(h.rating)}${'☆'.repeat(5-h.rating)}</div></div></div>`).join('')}
-          </div>
-        </div>
+        <div id="my-offered"><div class="no-results">Loading your offered rides…</div></div>
+        <div id="my-joined" class="hidden"><div class="no-results">Loading your joined rides…</div></div>
+        <div id="my-history" class="hidden"><div class="no-results">Loading ride history…</div></div>
       </div>
 
       <!-- ACTIVE RIDE -->
@@ -729,35 +674,20 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
           <button class="btn btn-red btn-sm" onclick="showSection('offer')">+ Post New Ride</button>
         </div>
         <div class="dd-grid">
-          <div class="dd-stat"><div class="dd-val" style="color:var(--green)">Rs.12,480</div><div class="dd-lbl">Fuel recovered this month</div></div>
-          <div class="dd-stat"><div class="dd-val">26</div><div class="dd-lbl">Rides completed</div></div>
-          <div class="dd-stat"><div class="dd-val" style="color:var(--yellow)">★ 4.8</div><div class="dd-lbl">Your driver rating</div></div>
-          <div class="dd-stat"><div class="dd-val" style="color:var(--red)">3</div><div class="dd-lbl">Pending requests</div></div>
+          <div class="dd-stat"><div class="dd-val" id="dd-fuel" style="color:var(--green)">—</div><div class="dd-lbl">Fuel recovered (est.)</div></div>
+          <div class="dd-stat"><div class="dd-val" id="dd-rides">0</div><div class="dd-lbl">Rides offered</div></div>
+          <div class="dd-stat"><div class="dd-val" id="dd-rating" style="color:var(--yellow)">—</div><div class="dd-lbl">Your rating</div></div>
+          <div class="dd-stat"><div class="dd-val" id="dd-pending" style="color:var(--red)">0</div><div class="dd-lbl">Pending requests</div></div>
         </div>
         <div class="divider"></div>
         <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">Incoming Passenger Requests</div>
-        <div>
-          <div class="req-card">
-            <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--red)">Z</div>
-            <div><div class="req-name">Zain Raza</div><div class="req-meta">⭐ 4.7 · 12 rides · Member since Mar 2026</div><div class="req-area">📍 Pickup: Gulshan Block 13 → I.I. Chundrigar</div></div>
-            <div class="req-actions"><button class="btn btn-green btn-sm" onclick="acceptRequest('Zain Raza')">✓ Accept</button><button class="btn btn-outline btn-sm" onclick="showToast('Zain Raza declined.','err')">✕</button><button class="btn-ghost btn-sm" onclick="openRateModal()">Profile</button></div>
-          </div>
-          <div class="req-card">
-            <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--blue)">N</div>
-            <div><div class="req-name">Nadia Hussain</div><div class="req-meta">⭐ 4.9 · 8 rides · Member since Feb 2026</div><div class="req-area">📍 Pickup: PECHS Block 2 → I.I. Chundrigar</div></div>
-            <div class="req-actions"><button class="btn btn-green btn-sm" onclick="acceptRequest('Nadia Hussain')">✓ Accept</button><button class="btn btn-outline btn-sm" onclick="showToast('Nadia Hussain declined.','err')">✕</button><button class="btn-ghost btn-sm">Profile</button></div>
-          </div>
-          <div class="req-card">
-            <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--yellow);color:#0D0D0D">U</div>
-            <div><div class="req-name">Usman Khan</div><div class="req-meta">⭐ 4.5 · 3 rides · Member since Apr 2026</div><div class="req-area">📍 Pickup: Nursery Block → I.I. Chundrigar</div></div>
-            <div class="req-actions"><button class="btn btn-green btn-sm" onclick="acceptRequest('Usman Khan')">✓ Accept</button><button class="btn btn-outline btn-sm" onclick="showToast('Usman Khan declined.','err')">✕</button><button class="btn-ghost btn-sm">Profile</button></div>
-          </div>
+        <div id="dashboard-requests">
+          <div class="no-results">No pending requests. Post a ride to receive passenger requests.</div>
         </div>
         <div class="divider"></div>
         <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">Your Active Routes</div>
-        <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;display:flex;justify-content:space-between;align-items:center">
-          <div><div style="font-family:var(--fd)">PECHS → I.I. Chundrigar</div><div style="font-size:.78rem;color:var(--muted);margin-top:.25rem">Mon–Fri · 8:00 AM · 2/2 seats filled · Honda City</div></div>
-          <div style="display:flex;gap:.5rem;align-items:center"><span class="badge badge-green">Full</span><button class="btn btn-outline btn-sm" onclick="showSection('active')">Live →</button><button class="btn btn-outline btn-sm" onclick="showSection('offer')">Edit</button></div>
+        <div id="dashboard-routes">
+          <div class="no-results">No active routes. <button class="btn-ghost" onclick="showSection('offer')">Post your first ride →</button></div>
         </div>
       </div>
 
@@ -767,13 +697,8 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
           <div><div class="page-title">Notifications</div><div class="page-sub" id="notif-sub">3 unread</div></div>
           <button class="btn btn-outline btn-sm" onclick="markAllRead()">Mark all read</button>
         </div>
-        <div class="notif-list">
-          <div class="ni unread"><div class="ni-icon">🙋</div><div><div class="ni-title">New request from Zain Raza</div><div class="ni-body">Zain wants to join your PECHS → I.I. Chundrigar route. Rating: 4.7 · 12 rides completed.</div><div style="display:flex;gap:.5rem;margin-top:.6rem"><button class="btn btn-green btn-sm" onclick="acceptRequest('Zain Raza')">Accept</button><button class="btn btn-outline btn-sm" onclick="showToast('Declined.','err')">Decline</button></div></div><div class="ni-time">2 min ago</div></div>
-          <div class="ni unread"><div class="ni-icon">✅</div><div><div class="ni-title">Your request was accepted!</div><div class="ni-body">Sara M. accepted your request for the Gulshan → IBA Karachi ride. Departure: 7:45 AM daily. Her WhatsApp: 0321-XXXXXXX.</div></div><div class="ni-time">1 hr ago</div></div>
-          <div class="ni unread"><div class="ni-icon">⛽</div><div><div class="ni-title">Fuel price update: Rs.378/litre</div><div class="ni-body">PM Shehbaz reduced petrol from Rs.458 to Rs.378 after public pressure. Your ride cost calculations have been auto-updated.</div></div><div class="ni-time">3 hr ago</div></div>
-          <div class="ni"><div class="ni-icon">⭐</div><div><div class="ni-title">Sara M. gave you 5 stars</div><div class="ni-body">"Punctual, safe driver, clean and comfortable car. Will definitely carpool again!" — Sara M.</div></div><div class="ni-time">Yesterday</div></div>
-          <div class="ni"><div class="ni-icon">🔔</div><div><div class="ni-title">Ride reminder: Tomorrow 8:00 AM</div><div class="ni-body">Your PECHS → I.I. Chundrigar ride starts in 12 hours. Sara M. and Bilal A. are confirmed.</div></div><div class="ni-time">Yesterday</div></div>
-          <div class="ni"><div class="ni-icon">💸</div><div><div class="ni-title">Monthly savings report</div><div class="ni-body">This month you saved Rs.9,240 by carpooling. That's Rs.110,880 per year if you keep it up! 🎉</div></div><div class="ni-time">Mar 31</div></div>
+        <div class="notif-list" id="notif-list">
+          <div class="no-results">Loading notifications…</div>
         </div>
       </div>
 
@@ -781,30 +706,25 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
       <div id="ap-profile" class="ap-section">
         <div class="page-hdr">
           <div><div class="page-title">My Profile</div></div>
-          <button class="btn btn-red btn-sm" onclick="showToast('✓ Profile saved!')">Save Changes</button>
+          <button class="btn btn-red btn-sm" onclick="saveProfile()">Save Changes</button>
         </div>
         <div class="profile-layout">
           <div>
             <div class="profile-card">
-              <div class="avatar profile-av" style="background:var(--red)">F</div>
-              <div class="profile-name">Farhan Ahmed</div>
-              <div class="profile-role">Driver & Passenger · Karachi</div>
-              <div class="stars" style="justify-content:center;font-size:1.1rem;margin:.3rem 0">★★★★★</div>
-              <div style="font-size:.75rem;color:var(--muted)">4.9 rating · 28 rides</div>
+              <div class="avatar profile-av" id="profile-av-init" style="background:var(--red);width:80px;height:80px;font-size:2rem;margin:0 auto 1rem">?</div>
+              <div class="profile-name" id="profile-display-name" style="font-family:var(--fd);font-size:1.3rem;margin-bottom:.2rem">—</div>
+              <div class="profile-role" id="profile-display-role" style="font-size:.75rem;color:var(--muted);margin-bottom:.7rem">Karachi</div>
+              <div class="stars" style="justify-content:center;font-size:1.1rem;margin:.3rem 0" id="profile-stars">☆☆☆☆☆</div>
+              <div style="font-size:.75rem;color:var(--muted)" id="profile-rating-line">No rides yet</div>
               <div class="profile-stats">
-                <div><div class="ps-val">26</div><div class="ps-lbl">Driven</div></div>
-                <div><div class="ps-val">8</div><div class="ps-lbl">Joined</div></div>
-                <div><div class="ps-val" style="color:var(--green)">Rs.24k</div><div class="ps-lbl">Saved</div></div>
+                <div><div class="ps-val" id="ps-driven">0</div><div class="ps-lbl">Driven</div></div>
+                <div><div class="ps-val" id="ps-joined">0</div><div class="ps-lbl">Joined</div></div>
+                <div><div class="ps-val" id="ps-saved" style="color:var(--green)">Rs.0</div><div class="ps-lbl">Saved</div></div>
               </div>
-              <button class="btn btn-outline btn-full btn-sm" onclick="showToast('Photo upload coming in next version!','info')">📷 Change Photo</button>
               <div class="divider"></div>
-              <div style="background:var(--black);border:1px solid var(--border);padding:.9rem;display:flex;align-items:center;gap:.8rem">
+              <div id="profile-vehicle-card" style="background:var(--black);border:1px solid var(--border);padding:.9rem;display:flex;align-items:center;gap:.8rem">
                 <div style="font-size:1.8rem">🚗</div>
-                <div><div style="font-weight:600;font-size:.9rem">Honda City 2019</div><div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">KHI-4521 · White · 13 km/L</div></div>
-              </div>
-              <div style="display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap">
-                <span class="badge badge-green">Verified ✓</span>
-                <span class="badge badge-muted">CNIC Checked</span>
+                <div style="font-size:.82rem;color:var(--muted)">No vehicle added yet.<br>Fill in Vehicle Details and save.</div>
               </div>
             </div>
           </div>
@@ -812,36 +732,62 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
             <div class="pf-section">
               <div class="pf-title">Personal Information</div>
               <div class="fg2">
-                <div class="field"><label>Full Name</label><input type="text" value="Farhan Ahmed"/></div>
-                <div class="field"><label>Phone / WhatsApp</label><input type="tel" value="0312-XXXXXXX"/></div>
-                <div class="field"><label>Email (optional)</label><input type="email" placeholder="for trip receipts"/></div>
-                <div class="field"><label>Gender</label><select><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
-                <div class="field full"><label>Home Area</label><select id="p-area" onchange="handleProfileAreaOther()"><option selected>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option><option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option><option>Nazimabad</option><option>Malir</option><option>Korangi</option><option>Orangi Town</option><option>Liaquatabad</option><option>Landhi</option><option value="__other__">Other (type below)</option></select><input type="text" id="p-area-other" class="hidden" placeholder="Type your area..." style="margin-top:.4rem"/></div>
+                <div class="field"><label>Full Name</label><input type="text" id="p-name" placeholder="Your full name"/></div>
+                <div class="field"><label>Phone / WhatsApp</label><input type="tel" id="p-phone" placeholder="03XX-XXXXXXX"/></div>
+                <div class="field"><label>Email</label><input type="email" id="p-email" placeholder="your@email.com" readonly style="opacity:.6"/></div>
+                <div class="field"><label>Gender</label><select id="p-gender"><option value="">Select…</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+                <div class="field full"><label>Home Area</label>
+                  <select id="p-area" onchange="handleProfileAreaOther()">
+                    <option value="">Select area…</option>
+                    <option>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option>
+                    <option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option>
+                    <option>Nazimabad</option><option>Malir</option><option>Korangi</option>
+                    <option>Orangi Town</option><option>Liaquatabad</option><option>Landhi</option>
+                    <option value="__other__">Other (type below)</option>
+                  </select>
+                  <input type="text" id="p-area-other" class="hidden" placeholder="Type your area..." style="margin-top:.4rem"/>
+                </div>
               </div>
             </div>
             <div class="pf-section">
-              <div class="pf-title">Vehicle Details</div>
+              <div class="pf-title">Vehicle Details <span style="font-size:.72rem;color:var(--muted);font-family:var(--fb);font-weight:400">(leave blank if you don't drive)</span></div>
               <div class="fg2">
-                <div class="field"><label>Make & Model</label><select id="p-car" onchange="handleProfileCarOther()"><option selected>Honda City</option><option>Toyota Corolla</option><option>Suzuki Alto</option><option>Honda CB 150F</option><option>Honda CG 125</option><option>Yamaha YBR 125</option><option>I don't drive</option><option value="__other__">Other (type below)</option></select><input type="text" id="p-car-other" class="hidden" placeholder="Type vehicle model..." style="margin-top:.4rem"/></div>
-                <div class="field"><label>Year</label><input type="number" value="2019" min="2000" max="2026"/></div>
-                <div class="field"><label>Number Plate</label><input type="text" value="KHI-4521"/></div>
-                <div class="field"><label>Mileage (km/L)</label><input type="number" value="13"/></div>
-                <div class="field"><label>Color</label><input type="text" value="White"/></div>
-                <div class="field"><label>AC Available?</label><select><option>Yes</option><option>No</option></select></div>
+                <div class="field">
+                  <label>Make & Model</label>
+                  <select id="p-car" onchange="handleProfileCarOther()">
+                    <option value="">None / Not applicable</option>
+                    <option>Honda City</option><option>Toyota Corolla</option><option>Suzuki Alto</option>
+                    <option>Suzuki Swift</option><option>Honda Civic</option><option>Suzuki Cultus</option>
+                    <option>Toyota Yaris</option><option>KIA Picanto</option>
+                    <option>Honda CD 70</option><option>Honda CG 125</option><option>Honda CB 150F</option>
+                    <option>Yamaha YBR 125</option><option>Suzuki GS 150</option>
+                    <option value="__other__">Other (type below)</option>
+                  </select>
+                  <input type="text" id="p-car-other" class="hidden" placeholder="Type vehicle model..." style="margin-top:.4rem"/>
+                </div>
+                <div class="field"><label>Year</label><input type="number" id="p-car-year" placeholder="2020" min="2000" max="2026"/></div>
+                <div class="field"><label>Number Plate</label><input type="text" id="p-plate" placeholder="KHI-XXXX"/></div>
+                <div class="field"><label>Mileage (km/L)</label><input type="number" id="p-mileage" placeholder="13"/></div>
+                <div class="field"><label>Color</label><input type="text" id="p-color" placeholder="White"/></div>
+                <div class="field"><label>AC Available?</label><select id="p-ac"><option value="">—</option><option>Yes</option><option>No</option></select></div>
               </div>
             </div>
             <div class="pf-section">
               <div class="pf-title">Ride Preferences</div>
-              <div class="prefs-grid">
-                <div class="pref-tog on" onclick="this.classList.toggle('on')">🚭 No Smoking in Car</div>
-                <div class="pref-tog on" onclick="this.classList.toggle('on')">🎵 Music OK</div>
-                <div class="pref-tog" onclick="this.classList.toggle('on')">🎓 Students Preferred</div>
-                <div class="pref-tog on" onclick="this.classList.toggle('on')">💼 Office Commuters</div>
+              <div class="prefs-grid" id="profile-prefs">
+                <div class="pref-tog" id="pp-nosmoking" onclick="this.classList.toggle('on')">🚭 No Smoking</div>
+                <div class="pref-tog" id="pp-music" onclick="this.classList.toggle('on')">🎵 Music OK</div>
+                <div class="pref-tog" id="pp-students" onclick="this.classList.toggle('on')">🎓 Students Preferred</div>
+                <div class="pref-tog" id="pp-office" onclick="this.classList.toggle('on')">💼 Office Commuters</div>
+                <div class="pref-tog" id="pp-female" onclick="this.classList.toggle('on')">🚺 Female Only</div>
+                <div class="pref-tog" id="pp-helmet" onclick="this.classList.toggle('on')">⛑️ Helmet Provided</div>
               </div>
             </div>
             <div class="pf-section">
               <div class="pf-title">Reviews Received</div>
-              ${[{name:'Sara M.',stars:5,text:'Very punctual and safe driver. Comfortable car.',date:'Apr 1'},{name:'Bilal A.',stars:5,text:'Great experience. Will carpool again!',date:'Mar 28'},{name:'Nadia H.',stars:4,text:'Good driver, slightly late once but otherwise great.',date:'Mar 18'}].map(r=>`<div class="review-item"><div class="review-hdr"><div style="font-weight:600;font-size:.85rem">${r.name}</div><div style="display:flex;align-items:center;gap:.5rem"><div class="stars" style="font-size:.8rem">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div><span style="font-size:.7rem;color:var(--muted)">${r.date}</span></div></div><div style="font-size:.8rem;color:var(--muted)">${r.text}</div></div>`).join('')}
+              <div id="profile-reviews">
+                <div style="font-size:.82rem;color:var(--muted);padding:1rem;background:var(--black);border:1px solid var(--border)">No reviews yet. Complete rides to receive ratings.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -950,31 +896,63 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  SAATHCHALO — Full Backend-Integrated JS
-//  Firebase Auth (Email/Password + Google) + Firestore
+//  SAATHCHALO — Production JS
+//  All data is real — fetched from / written to Firestore
+//  No hardcoded user data anywhere
 // ═══════════════════════════════════════════════════════════
 
-// ── GLOBALS ──
 const PETROL = 378;
 let currentVehicleType = 'car';
 let activeFilters = new Set();
 window._currentUser = null;
+let _ridesUnsubscribe = null;  // real-time listener cleanup
 
-// ── FIRESTORE HELPER (shorthand) ──
 const FB = () => window._fb;
 
-// ── STATIC SAMPLE RIDES (shown before Firestore loads) ──
-const SAMPLE_RIDES = [
-  {id:'s1',init:'A',name:'Ahmed K.',color:'#E8380D',tc:'#fff',vtype:'car',from:'PECHS',to:'I.I. Chundrigar (Downtown)',time:'8:00 AM',car:'Honda City',ml:13,seats:2,total:2,cost:95,tags:['Daily','Verified','AC','Car'],prefs:['AC','No Smoking'],phone:'03022373116',rating:4.9,trips:26,joined:'Jan 2026',plate:'KHI-4521',about:'Office commuter going downtown daily. Non-smoker, light music only.',isDemo:true},
-  {id:'s2',init:'S',name:'Sara M.',color:'#2ECC71',tc:'#0D0D0D',vtype:'car',from:'Gulshan-e-Iqbal',to:'IBA Karachi',time:'7:45 AM',car:'Suzuki Swift',ml:12,seats:1,total:1,cost:110,tags:['Mon–Fri','Female Driver','Verified','Car'],prefs:['Female Only','AC'],phone:'03211234567',rating:4.8,trips:18,joined:'Feb 2026',plate:'KHI-7890',about:'University lecturer at IBA. Female passengers preferred.',isDemo:true},
-  {id:'s3',init:'B',name:'Bilal R.',color:'#3B82F6',tc:'#fff',vtype:'car',from:'Defence (DHA)',to:'Shaheed-e-Millat Road',time:'8:30 AM',car:'Toyota Corolla',ml:14,seats:3,total:3,cost:130,tags:['Daily','AC','Verified','Car'],prefs:['AC','Music OK'],phone:'03331234567',rating:4.7,trips:34,joined:'Dec 2025',plate:'KHI-2233',about:'Software engineer commuting daily. Music allowed, clean car.',isDemo:true},
-  {id:'s4',init:'F',name:'Fatima A.',color:'#9B59B6',tc:'#fff',vtype:'car',from:'Clifton',to:'NUCES FAST',time:'7:30 AM',car:'Suzuki Alto',ml:15,seats:2,total:2,cost:80,tags:['Mon–Fri','Students','Female Driver','Car'],prefs:['Students','No Smoking'],phone:'03001234567',rating:5.0,trips:12,joined:'Mar 2026',plate:'KHI-5566',about:'CS student at FAST. Looking for fellow students going same way.',isDemo:true},
-  {id:'s5',init:'Z',name:'Zaid H.',color:'#F4C430',tc:'#0D0D0D',vtype:'car',from:'North Nazimabad',to:'NED University',time:'8:15 AM',car:'Honda Civic',ml:13,seats:3,total:3,cost:70,tags:['Daily','AC','Music OK','Car'],prefs:['AC','Music OK'],phone:'03111234567',rating:4.6,trips:22,joined:'Jan 2026',plate:'KHI-8877',about:'Engineering student at NED. Chill ride, music playing.',isDemo:true},
-  {id:'s6',init:'M',name:'Mariam N.',color:'#E8380D',tc:'#fff',vtype:'car',from:'Gulistan-e-Jauhar',to:'Karachi University',time:'7:50 AM',car:'Suzuki Cultus',ml:12,seats:2,total:2,cost:85,tags:['Mon–Fri','Female Only','Students','Car'],prefs:['Female Only','Students'],phone:'03451234567',rating:4.9,trips:15,joined:'Feb 2026',plate:'KHI-3344',about:'PhD student at KU. Female-only vehicle. Students preferred.',isDemo:true},
-  {id:'s7',init:'T',name:'Tariq H.',color:'#E8380D',tc:'#fff',vtype:'bike',from:'PECHS',to:'Saddar',time:'8:00 AM',car:'Honda CG 125',ml:40,seats:1,total:1,cost:30,tags:['Daily','Bike','Pillion'],prefs:['Helmet Provided'],phone:'03161234567',rating:4.7,trips:11,joined:'Mar 2026',plate:'KHI-9012',about:'Daily office commuter on bike. Helmet provided for pillion.',isDemo:true},
-  {id:'s8',init:'U',name:'Umar F.',color:'#9B59B6',tc:'#fff',vtype:'bike',from:'North Nazimabad',to:'NED University',time:'7:45 AM',car:'Yamaha YBR 125',ml:45,seats:1,total:1,cost:25,tags:['Mon–Fri','Students','Bike'],prefs:['Students','No Smoking'],phone:'03181234567',rating:4.9,trips:19,joined:'Feb 2026',plate:'KHI-3355',about:'NED student going daily. Students only.',isDemo:true},
-];
-let ALL_RIDES = [...SAMPLE_RIDES]; // merged: sample + Firestore live rides
+// ════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════
+
+const $ = id => document.getElementById(id);
+const set = (id, v) => { const el=$(id); if(el) el.textContent = v; };
+const setVal = (id, v) => { const el=$(id); if(el && v !== undefined && v !== null) el.value = v; };
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const sec = Math.floor((Date.now() - d) / 1000);
+  if (sec < 60) return 'Just now';
+  if (sec < 3600) return Math.floor(sec/60) + ' min ago';
+  if (sec < 86400) return Math.floor(sec/3600) + ' hr ago';
+  if (sec < 604800) return Math.floor(sec/86400) + ' day' + (Math.floor(sec/86400)>1?'s':'') + ' ago';
+  return d.toLocaleDateString('en-PK', {day:'numeric',month:'short'});
+}
+
+function starsHTML(r) {
+  const f = Math.floor(r||0);
+  return '★'.repeat(f) + '☆'.repeat(5-f);
+}
+
+function formatWANumber(phone) {
+  let n = (phone||'').replace(/[\s\-\(\)]/g,'');
+  if (n.startsWith('0')) n = '92' + n.slice(1);
+  if (n.startsWith('+')) n = n.slice(1);
+  return n;
+}
+
+function empty(containerId, msg) {
+  const el = $(containerId);
+  if (el) el.innerHTML = `<div class="no-results">${msg}</div>`;
+}
+
+function loading(containerId) {
+  const el = $(containerId);
+  if (el) el.innerHTML = `<div class="no-results" style="color:var(--muted)">⏳ Loading…</div>`;
+}
+
+// ════════════════════════════════════════
+//  DISTANCE TABLE
+// ════════════════════════════════════════
 
 const DIST = {
   'PECHS':{'I.I. Chundrigar (Downtown)':7,'Shaheed-e-Millat Road':5,'NUCES FAST':18,'IBA Karachi':12,'NED University':14,'Korangi Industrial':20,'Saddar':9,'Karachi University':16,'Port Qasim':30,'Clifton':8,'Tariq Road':3},
@@ -990,643 +968,319 @@ const DIST = {
 };
 
 // ════════════════════════════════════════
-//  FIREBASE AUTH
+//  AUTH STATE
 // ════════════════════════════════════════
 
-// Update nav/UI based on auth state
 function updateNavForUser(user) {
-  const btn = document.getElementById('auth-btn');
-  const banner = document.getElementById('verify-banner');
+  const btn = $('auth-btn');
+  const banner = $('verify-banner');
   if (!btn) return;
   if (user) {
-    const displayName = user.displayName || user.email.split('@')[0];
-    btn.textContent = displayName.split(' ')[0];
+    const name = user.displayName || user.email.split('@')[0];
+    btn.textContent = name.split(' ')[0];
     btn.onclick = () => showSection('profile');
-    // Show verification banner if email not verified
-    if (!user.emailVerified && !user.providerData.some(p => p.providerId === 'google.com')) {
+    btn.className = 'btn btn-outline btn-sm';
+    const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+    if (!user.emailVerified && !isGoogle) {
       banner.classList.remove('hidden');
-      const txt = document.getElementById('verify-email-txt');
+      const txt = $('verify-email-txt');
       if (txt) txt.textContent = user.email;
     } else {
       banner.classList.add('hidden');
     }
-    // Hide Sign In button style, show as name
-    btn.className = 'btn btn-outline btn-sm';
-    document.getElementById('ndot')?.style?.removeProperty('display');
   } else {
     btn.textContent = 'Sign In';
     btn.onclick = openAuthModal;
     btn.className = 'btn btn-red btn-sm';
-    banner.classList.add('hidden');
-    document.getElementById('ndot').style.display = 'none';
+    if (banner) banner.classList.add('hidden');
   }
 }
 
-function setAuthLoading(btnId, loading, originalText) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.textContent = loading ? 'Please wait…' : originalText;
-  btn.style.opacity = loading ? '0.6' : '1';
+// ════════════════════════════════════════
+//  AUTH — SIGN UP
+// ════════════════════════════════════════
+
+function setAuthLoading(btnId, on, orig) {
+  const b = $(btnId);
+  if (!b) return;
+  b.disabled = on;
+  b.textContent = on ? 'Please wait…' : orig;
+  b.style.opacity = on ? '0.6' : '1';
 }
-function showAuthError(formId, msg) {
-  const el = document.getElementById(formId);
+function showAuthError(id, msg) {
+  const el = $(id);
   if (!el) return;
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 6000);
+  el.textContent = msg; el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 7000);
 }
 function clearAuthErrors() {
-  ['auth-error','login-error'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
+  ['auth-error','login-error'].forEach(id => { const e=$(id); if(e) e.classList.add('hidden'); });
 }
 
-// SIGN UP with email/password
 async function handleSignUp() {
-  if (!FB()) { showToast('Firebase not connected. Add your config.', 'err'); return; }
+  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
   clearAuthErrors();
-  const name  = document.getElementById('su-name')?.value?.trim();
-  const email = document.getElementById('su-email')?.value?.trim();
-  const phone = document.getElementById('su-phone')?.value?.trim();
-  const pass  = document.getElementById('su-pass')?.value;
-  const area  = document.getElementById('au-area')?.value === '__other__'
-    ? document.getElementById('au-area-other')?.value?.trim()
-    : document.getElementById('au-area')?.value;
+  const name  = $('su-name')?.value?.trim();
+  const email = $('su-email')?.value?.trim();
+  const phone = $('su-phone')?.value?.trim();
+  const pass  = $('su-pass')?.value;
+  const areaSel = $('au-area');
+  const area = areaSel?.value === '__other__'
+    ? $('au-area-other')?.value?.trim() || 'Other'
+    : areaSel?.value || 'PECHS';
 
-  if (!name)  { showAuthError('auth-error', 'Please enter your full name.'); return; }
-  if (!email) { showAuthError('auth-error', 'Please enter your email address.'); return; }
-  if (!phone) { showAuthError('auth-error', 'Please enter your WhatsApp number.'); return; }
-  if (!pass || pass.length < 6) { showAuthError('auth-error', 'Password must be at least 6 characters.'); return; }
+  if (!name)  { showAuthError('auth-error','Enter your full name.'); return; }
+  if (!email) { showAuthError('auth-error','Enter your email address.'); return; }
+  if (!phone) { showAuthError('auth-error','Enter your WhatsApp number.'); return; }
+  if (!pass || pass.length < 6) { showAuthError('auth-error','Password must be at least 6 characters.'); return; }
 
   setAuthLoading('su-btn', true, 'Create Account — Free →');
   try {
     const { user } = await FB().createUserWithEmailAndPassword(FB().auth, email, pass);
-    // Send verification email
     await FB().sendEmailVerification(user);
-    // Save user profile to Firestore
-    await FB().setDoc(FB().doc(FB().db, 'users', user.uid), {
-      name, email, phone, area: area || 'PECHS',
-      roles: getRolesSelected(),
-      rating: 5.0, trips: 0, ridesOffered: 0,
-      createdAt: FB().serverTimestamp(),
-      photoURL: null, vehicle: null,
-      emailVerified: false
+    await FB().setDoc(FB().doc(FB().db,'users',user.uid), {
+      name, email, phone, area,
+      roles: Array.from(document.querySelectorAll('#su-roles .role-opt.on')).map(o=>o.querySelector('.role-lbl')?.textContent?.toLowerCase()).filter(Boolean),
+      rating: 0, totalRatings: 0, ridesDriven: 0, ridesJoined: 0,
+      vehicle: null, prefs: [], createdAt: FB().serverTimestamp(),
     });
     closeAuthModal();
-    showToast(`✓ Account created! Check ${email} for a verification link.`, 'info');
-  } catch (err) {
-    const msgs = {
-      'auth/email-already-in-use': 'This email is already registered. Try logging in.',
-      'auth/invalid-email': 'Please enter a valid email address.',
-      'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
-    };
-    showAuthError('auth-error', msgs[err.code] || err.message);
-  } finally {
-    setAuthLoading('su-btn', false, 'Create Account — Free →');
-  }
+    showToast(`✓ Account created! Verify your email at ${email} to post rides.`,'info');
+  } catch(err) {
+    const m = {'auth/email-already-in-use':'Email already registered. Try logging in.','auth/invalid-email':'Enter a valid email.','auth/weak-password':'Password too weak (min 6 chars).'};
+    showAuthError('auth-error', m[err.code] || err.message);
+  } finally { setAuthLoading('su-btn', false, 'Create Account — Free →'); }
 }
 
-// LOGIN with email/password
+// ════════════════════════════════════════
+//  AUTH — LOGIN
+// ════════════════════════════════════════
+
 async function handleLogin() {
-  if (!FB()) { showToast('Firebase not connected. Add your config.', 'err'); return; }
+  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
   clearAuthErrors();
-  const email = document.getElementById('li-email')?.value?.trim();
-  const pass  = document.getElementById('li-pass')?.value;
-  if (!email) { showAuthError('login-error', 'Please enter your email address.'); return; }
-  if (!pass)  { showAuthError('login-error', 'Please enter your password.'); return; }
+  const email = $('li-email')?.value?.trim();
+  const pass  = $('li-pass')?.value;
+  if (!email) { showAuthError('login-error','Enter your email.'); return; }
+  if (!pass)  { showAuthError('login-error','Enter your password.'); return; }
 
   setAuthLoading('li-btn', true, 'Log In →');
   try {
-    const { user } = await FB().signInWithEmailAndPassword(FB().auth, email, pass);
+    await FB().signInWithEmailAndPassword(FB().auth, email, pass);
     closeAuthModal();
-    showToast(`✓ Welcome back, ${user.displayName || email.split('@')[0]}!`);
     showSection('find');
-  } catch (err) {
-    const msgs = {
-      'auth/user-not-found': 'No account found with this email.',
-      'auth/wrong-password': 'Incorrect password. Try again.',
-      'auth/invalid-email': 'Please enter a valid email address.',
-      'auth/too-many-requests': 'Too many failed attempts. Try again later.',
-    };
-    showAuthError('login-error', msgs[err.code] || 'Login failed. Check credentials.');
-  } finally {
-    setAuthLoading('li-btn', false, 'Log In →');
-  }
+  } catch(err) {
+    const m = {'auth/user-not-found':'No account with this email.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Enter a valid email.','auth/too-many-requests':'Too many attempts. Try again later.'};
+    showAuthError('login-error', m[err.code] || 'Login failed.');
+  } finally { setAuthLoading('li-btn', false, 'Log In →'); }
 }
 
-// GOOGLE SIGN-IN
+// ════════════════════════════════════════
+//  AUTH — GOOGLE
+// ════════════════════════════════════════
+
 async function signInWithGoogle() {
-  if (!FB()) { showToast('Firebase not connected. Add your config.', 'err'); return; }
-  const btn = document.getElementById('google-btn');
+  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
+  const btn = $('google-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
   try {
-    const result = await FB().signInWithPopup(FB().auth, FB().googleProvider);
-    const user = result.user;
-    // Create/update Firestore profile
-    const ref = FB().doc(FB().db, 'users', user.uid);
+    const { user } = await FB().signInWithPopup(FB().auth, FB().googleProvider);
+    const ref = FB().doc(FB().db,'users',user.uid);
     const snap = await FB().getDoc(ref);
     if (!snap.exists()) {
       await FB().setDoc(ref, {
-        name: user.displayName, email: user.email,
-        phone: '', area: 'PECHS', roles: ['find'],
-        rating: 5.0, trips: 0, ridesOffered: 0,
+        name: user.displayName, email: user.email, phone: '', area: '',
+        roles: ['find'], rating: 0, totalRatings: 0,
+        ridesDriven: 0, ridesJoined: 0, vehicle: null, prefs: [],
         createdAt: FB().serverTimestamp(),
-        photoURL: user.photoURL, vehicle: null,
-        emailVerified: true
       });
     }
     closeAuthModal();
-    showToast(`✓ Welcome, ${user.displayName}!`);
     showSection('find');
-  } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') {
-      showToast('Google sign-in failed: ' + err.message, 'err');
-    }
+  } catch(err) {
+    if (err.code !== 'auth/popup-closed-by-user')
+      showToast('Google sign-in failed: ' + err.message,'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Continue with Google`; }
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Continue with Google`;
+    }
   }
 }
 
-// FORGOT PASSWORD
 async function handleForgotPassword() {
   if (!FB()) return;
-  const email = document.getElementById('li-email')?.value?.trim();
-  if (!email) { showAuthError('login-error', 'Enter your email above first.'); return; }
+  const email = $('li-email')?.value?.trim();
+  if (!email) { showAuthError('login-error','Enter your email above first.'); return; }
   try {
     await FB().sendPasswordResetEmail(FB().auth, email);
-    showToast(`Password reset email sent to ${email}`, 'info');
-  } catch (err) {
-    showAuthError('login-error', err.code === 'auth/user-not-found'
-      ? 'No account found with this email.' : err.message);
+    showToast(`Password reset email sent to ${email}`,'info');
+  } catch(err) {
+    showAuthError('login-error', err.code==='auth/user-not-found'?'No account with this email.':err.message);
   }
 }
 
 async function resendVerification() {
-  const user = window._currentUser;
-  if (!user) return;
-  try {
-    await FB().sendEmailVerification(user);
-    showToast('Verification email re-sent! Check your inbox.', 'info');
-  } catch (e) {
-    showToast('Could not resend. Try again in a minute.', 'err');
-  }
+  if (!window._currentUser) return;
+  try { await FB().sendEmailVerification(window._currentUser); showToast('Verification email re-sent!','info'); }
+  catch(e) { showToast('Could not resend. Wait a minute and try again.','err'); }
 }
 
 async function handleSignOut() {
   if (!FB()) return;
+  if (_ridesUnsubscribe) { _ridesUnsubscribe(); _ridesUnsubscribe = null; }
   await FB().signOut(FB().auth);
-  showToast('Signed out successfully.', 'info');
+  showToast('Signed out.','info');
   goHome();
 }
 
-function getRolesSelected() {
-  const opts = document.querySelectorAll('#su-roles .role-opt.on');
-  return Array.from(opts).map(o => o.querySelector('.role-lbl')?.textContent?.toLowerCase());
-}
-
-// ── Auth modal tab switching ──
-function openAuthModal() { document.getElementById('auth-modal').classList.add('open'); }
-function closeAuthModal() { document.getElementById('auth-modal').classList.remove('open'); clearAuthErrors(); }
+function openAuthModal() { $('auth-modal').classList.add('open'); }
+function closeAuthModal() { $('auth-modal').classList.remove('open'); clearAuthErrors(); }
 function switchAuthTab(t) {
-  document.getElementById('af-signup').classList.toggle('hidden', t !== 'signup');
-  document.getElementById('af-login').classList.toggle('hidden', t !== 'login');
-  document.getElementById('at-signup').classList.toggle('active', t === 'signup');
-  document.getElementById('at-login').classList.toggle('active', t === 'login');
+  $('af-signup').classList.toggle('hidden', t!=='signup');
+  $('af-login').classList.toggle('hidden', t!=='login');
+  $('at-signup').classList.toggle('active', t==='signup');
+  $('at-login').classList.toggle('active', t==='login');
   clearAuthErrors();
 }
 
-// Auth guard — returns true if user is logged in AND email is verified
 function requireAuth(action) {
-  const user = window._currentUser;
-  if (!user) {
-    openAuthModal();
-    showToast('Please sign in to ' + action, 'info');
-    return false;
-  }
-  const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-  if (!user.emailVerified && !isGoogle) {
-    showToast('Please verify your email first. Check your inbox.', 'err');
-    return false;
-  }
+  const u = window._currentUser;
+  if (!u) { openAuthModal(); showToast('Sign in to '+action,'info'); return false; }
+  const isGoogle = u.providerData.some(p=>p.providerId==='google.com');
+  if (!u.emailVerified && !isGoogle) { showToast('Verify your email first. Check your inbox.','err'); return false; }
   return true;
 }
 
 // ════════════════════════════════════════
-//  FIRESTORE — RIDES
+//  FIRESTORE — RIDES (real-time listener)
 // ════════════════════════════════════════
 
-// Load live rides from Firestore and merge with sample rides
-async function loadLiveRides() {
-  if (!FB()) { renderRides(ALL_RIDES); return; }
-  try {
-    const snap = await FB().getDocs(
-      FB().query(FB().collection(FB().db, 'rides'), FB().where('active','==',true))
-    );
-    const liveRides = snap.docs.map(d => ({ id: d.id, ...d.data(), isLive: true }));
-    ALL_RIDES = [...SAMPLE_RIDES, ...liveRides];
-    renderRides(ALL_RIDES);
-  } catch (e) {
-    console.warn('Firestore not connected, using sample data.', e);
-    renderRides(SAMPLE_RIDES);
-  }
-}
+function subscribeToRides() {
+  if (!FB()) { set('results-list',''); renderRides([]); return; }
+  loading('results-list');
+  // Clean up previous listener
+  if (_ridesUnsubscribe) _ridesUnsubscribe();
 
-// Post a new ride to Firestore
-async function submitOffer() {
-  if (!requireAuth('post a ride')) return;
-  const name = document.getElementById('o-name')?.value?.trim();
-  const wa   = document.getElementById('o-wa')?.value?.trim();
-  if (!name) { showToast('Please enter your name.', 'err'); return; }
-  if (!wa)   { showToast('Please enter your WhatsApp number.', 'err'); return; }
-
-  const isBike = currentVehicleType === 'bike';
-  const fromSel = document.getElementById('o-from');
-  const toSel   = document.getElementById('o-to');
-  const from = fromSel.value === '__other__'
-    ? document.getElementById('o-from-other').value.trim()
-    : fromSel.value;
-  const to = toSel.value === '__other__'
-    ? document.getElementById('o-to-other').value.trim()
-    : toSel.value;
-  const carSel  = document.getElementById(isBike ? 'o-bike' : 'o-car');
-  const carVal  = carSel?.value?.includes('Other')
-    ? document.getElementById(isBike ? 'o-bike-other' : 'o-car-other')?.value?.trim()
-    : carSel?.value;
-  const mileage = parseFloat(document.getElementById(isBike ? 'o-mileage-bike' : 'o-mileage')?.value || (isBike ? 35 : 13));
-  const seats   = parseInt(document.getElementById('o-seats')?.value || 2);
-  const time    = document.getElementById('o-time')?.value || '08:00';
-  const plate   = document.getElementById(isBike ? 'o-plate-bike' : 'o-plate')?.value?.trim();
-  const dist    = (DIST[from] && DIST[from][to]) || 12;
-  const cost    = Math.round((dist / mileage) * PETROL / (seats + 1));
-
-  const prefs = Array.from(document.querySelectorAll('.pref-tog.on'))
-    .map(el => el.textContent.replace(/[❄️🎵🚺🎓🚭💼⛑️🧥]/gu,'').trim());
-  const tags = [isBike ? 'Bike' : 'Car'];
-  if (prefs.some(p=>p.includes('AC'))) tags.push('AC');
-  if (prefs.some(p=>p.includes('Female'))) tags.push('Female Only');
-  if (prefs.some(p=>p.includes('Student'))) tags.push('Students');
-
-  const rideData = {
-    driverUid: window._currentUser.uid,
-    name, phone: wa, from, to, time, car: carVal,
-    plate: plate || '', ml: mileage, seats, total: seats,
-    cost, vtype: isBike ? 'bike' : 'car',
-    prefs, tags, active: true,
-    rating: window._currentUser.rating || 5.0,
-    trips: 0, init: name[0].toUpperCase(),
-    color: '#E8380D', tc: '#fff',
-    about: `Posted by ${name} on SaathChalo.`,
-    createdAt: FB().serverTimestamp(),
-  };
-
-  const btn = document.querySelector('#ap-offer .btn-red');
-  if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
-  try {
-    if (FB()) {
-      await FB().addDoc(FB().collection(FB().db, 'rides'), rideData);
-      // Increment user ridesOffered
-      await FB().updateDoc(FB().doc(FB().db,'users',window._currentUser.uid), {
-        ridesOffered: FB().increment(1)
-      });
-    }
-    showToast(`✓ Ride posted! Passengers can now find you.`);
-    setTimeout(() => showSection('dashboard'), 1300);
-  } catch (e) {
-    showToast('Error posting ride: ' + e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Post My Ride →'; }
-  }
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — REQUESTS
-// ════════════════════════════════════════
-
-async function requestJoin(rideId) {
-  if (!requireAuth('request to join a ride')) return;
-  const r = ALL_RIDES.find(x => x.id === rideId);
-  if (!r) return;
-
-  if (r.isDemo) {
-    showToast('✓ Request sent to ' + r.name + '! (Demo ride — connect Firebase for real requests.)', 'info');
-    return;
-  }
-
-  const user = window._currentUser;
-  try {
-    // Write request to Firestore
-    await FB().addDoc(FB().collection(FB().db,'requests'), {
-      rideId, riderId: user.uid, riderName: user.displayName || user.email,
-      riderEmail: user.email, driverUid: r.driverUid,
-      from: r.from, to: r.to, status: 'pending',
-      createdAt: FB().serverTimestamp()
-    });
-    // Add notification for driver
-    await FB().addDoc(FB().collection(FB().db,'notifications'), {
-      uid: r.driverUid, type: 'request',
-      title: 'New ride request',
-      body: `${user.displayName || user.email} wants to join your ${r.from} → ${r.to} ride.`,
-      rideId, read: false, createdAt: FB().serverTimestamp()
-    });
-    showToast(`✓ Request sent to ${r.name}! You'll be notified when they respond.`);
-    setTimeout(() => showToast('📱 Check Notifications for updates.','info'), 1800);
-  } catch(e) {
-    showToast('Error sending request: ' + e.message, 'err');
-  }
-}
-
-async function acceptRequest(nameOrId) {
-  showToast(`✓ ${nameOrId} accepted! Their WhatsApp number has been shared with you.`);
-  const badge = document.getElementById('nb-badge');
-  if (badge && parseInt(badge.textContent) > 0)
-    badge.textContent = parseInt(badge.textContent) - 1;
-  // In real app: update request doc status to 'accepted' and notify rider
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — USER PROFILE
-// ════════════════════════════════════════
-
-async function loadUserProfile(uid) {
-  if (!FB()) return;
-  try {
-    const snap = await FB().getDoc(FB().doc(FB().db,'users',uid));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    // Populate profile fields
-    const fields = {
-      'p-name': data.name, 'p-email': data.email,
-      'p-phone': data.phone, 'p-wa': data.phone
-    };
-    Object.entries(fields).forEach(([id,val])=>{
-      const el = document.getElementById(id);
-      if(el && val) el.value = val;
-    });
-    // Update profile card
-    const pname = document.querySelector('.profile-name');
-    if (pname) pname.textContent = data.name || '';
-    const pav = document.querySelector('.profile-av');
-    if (pav) pav.textContent = (data.name||'?')[0].toUpperCase();
-    // Stat counters
-    const psVals = document.querySelectorAll('.ps-val');
-    if (psVals[0]) psVals[0].textContent = data.ridesOffered || 0;
-    if (psVals[2]) psVals[2].textContent = 'Rs.' + (((data.ridesOffered||0)*146)).toLocaleString();
-  } catch(e) { console.warn('Profile load failed', e); }
-}
-
-async function saveProfile() {
-  if (!requireAuth('save profile')) return;
-  const uid = window._currentUser.uid;
-  const updates = {};
-  const nameEl  = document.getElementById('p-name');
-  const phoneEl = document.getElementById('p-phone');
-  if (nameEl?.value)  updates.name  = nameEl.value.trim();
-  if (phoneEl?.value) updates.phone = phoneEl.value.trim();
-  try {
-    if (FB()) await FB().updateDoc(FB().doc(FB().db,'users',uid), updates);
-    showToast('✓ Profile saved!');
-  } catch(e) { showToast('Error saving: ' + e.message,'err'); }
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — NOTIFICATIONS
-// ════════════════════════════════════════
-
-async function loadNotifications(uid) {
-  if (!FB()) return;
-  try {
-    const q = FB().query(
-      FB().collection(FB().db,'notifications'),
-      FB().where('uid','==',uid),
-      FB().orderBy('createdAt','desc')
-    );
-    FB().onSnapshot(q, (snap) => {
-      const unread = snap.docs.filter(d=>!d.data().read).length;
-      const badge  = document.getElementById('nb-badge');
-      if (badge) badge.textContent = unread || '';
-      if (unread > 0) {
-        document.getElementById('ndot')?.style?.removeProperty('display');
-      }
-    });
-  } catch(e) { console.warn('Notifications load failed', e); }
-}
-
-async function markAllRead() {
-  const user = window._currentUser;
-  if (user && FB()) {
-    try {
-      const snap = await FB().getDocs(
-        FB().query(FB().collection(FB().db,'notifications'),
-          FB().where('uid','==',user.uid), FB().where('read','==',false))
-      );
-      snap.docs.forEach(d => FB().updateDoc(d.ref, { read: true }));
-    } catch(e) {}
-  }
-  document.querySelectorAll('.ni.unread').forEach(el=>el.classList.remove('unread'));
-  const sub = document.getElementById('notif-sub');
-  if (sub) sub.textContent = 'All caught up ✓';
-  document.getElementById('ndot').style.display = 'none';
-  document.getElementById('nb-badge').style.display = 'none';
-  showToast('All notifications marked as read.', 'info');
-}
-
-async function loadMyRides(uid) {
-  // Placeholder — in real app query rides where driverUid==uid
-  // and requests where riderId==uid
-}
-
-// ════════════════════════════════════════
-//  WHATSAPP DIRECT OPEN
-// ════════════════════════════════════════
-
-function formatWANumber(phone) {
-  // Convert Pakistani number formats to WhatsApp international format
-  // 03XX-XXXXXXX  →  +923XXXXXXXXX  →  923XXXXXXXXX
-  let n = phone.replace(/[\s\-\(\)]/g,'');
-  if (n.startsWith('0')) n = '92' + n.slice(1);
-  if (n.startsWith('+')) n = n.slice(1);
-  return n;
-}
-function openWhatsApp(phone, name, context) {
-  const num = formatWANumber(phone);
-  const msg = encodeURIComponent(
-    `Salam ${name}! I found your ride on SaathChalo. ${context} — Can I join?`
+  const q = FB().query(
+    FB().collection(FB().db,'rides'),
+    FB().where('active','==',true),
+    FB().orderBy('createdAt','desc')
   );
-  window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+
+  _ridesUnsubscribe = FB().onSnapshot(q, (snap) => {
+    const rides = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        init: (data.name||'?')[0].toUpperCase(),
+        color: data.color || '#E8380D',
+        tc: data.tc || '#fff',
+        isLive: true,
+      };
+    });
+    renderRides(rides);
+    // Live count badge
+    set('live-ride-count', rides.length + ' active rides today');
+  }, (err) => {
+    console.warn('Rides listener error:', err);
+    renderRides([]);
+  });
 }
 
-// ════════════════════════════════════════
-//  ROUTING
-// ════════════════════════════════════════
-
-function goHome() {
-  document.getElementById('page-landing').classList.add('active');
-  document.getElementById('page-app').classList.remove('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  document.getElementById('nl-home').classList.add('active');
-}
-function showSection(s) {
-  document.getElementById('page-landing').classList.remove('active');
-  document.getElementById('page-app').classList.add('active');
-  document.querySelectorAll('.ap-section').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.sb-link').forEach(el=>el.classList.remove('active'));
-  const ap = document.getElementById('ap-'+s);
-  const sl = document.getElementById('sl-'+s);
-  if (ap) ap.classList.add('active');
-  if (sl) sl.classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  const nlmap = {find:'nl-find',offer:'nl-offer',myrides:'nl-rides',dashboard:'nl-dash'};
-  if (nlmap[s]) document.getElementById(nlmap[s]).classList.add('active');
-  window.scrollTo(0,0);
-  if (s==='find')  loadLiveRides();
-  if (s==='offer') offerCalc();
-}
-
-// ════════════════════════════════════════
-//  VEHICLE TYPE TOGGLE
-// ════════════════════════════════════════
-
-function setVehicleType(type) {
-  currentVehicleType = type;
-  const isBike = type==='bike';
-  document.getElementById('vtype-car').classList.toggle('on',!isBike);
-  document.getElementById('vtype-bike').classList.toggle('on',isBike);
-  document.getElementById('car-fields').classList.toggle('hidden',isBike);
-  document.getElementById('bike-fields').classList.toggle('hidden',!isBike);
-  document.querySelectorAll('.car-only').forEach(el=>el.classList.toggle('hidden',isBike));
-  document.querySelectorAll('.bike-only').forEach(el=>el.classList.toggle('hidden',!isBike));
-  document.getElementById('vehicle-section-title').textContent = isBike ? '🏍️ Bike Details' : '🚗 Vehicle Details';
-  offerCalc();
-}
-
-// ════════════════════════════════════════
-//  "OTHER" INPUT HANDLERS
-// ════════════════════════════════════════
-
-function handleFromChange() {
-  const sel=document.getElementById('f-from');
-  document.getElementById('f-from-other').classList.toggle('hidden', sel.value!=='__other__');
-  if (sel.value!=='__other__') filterRides();
-}
-function handleToChange() {
-  const sel=document.getElementById('f-to');
-  document.getElementById('f-to-other').classList.toggle('hidden', sel.value!=='__other__');
-  if (sel.value!=='__other__') filterRides();
-}
-function handleOfferFrom() {
-  const sel=document.getElementById('o-from');
-  document.getElementById('o-from-other').classList.toggle('hidden', sel.value!=='__other__');
-  offerCalc();
-}
-function handleOfferTo() {
-  const sel=document.getElementById('o-to');
-  document.getElementById('o-to-other').classList.toggle('hidden', sel.value!=='__other__');
-  offerCalc();
-}
-function handleCarOther()  { const s=document.getElementById('o-car');  document.getElementById('o-car-other').classList.toggle('hidden',!s.value.includes('Other')); }
-function handleBikeOther() { const s=document.getElementById('o-bike'); document.getElementById('o-bike-other').classList.toggle('hidden',!s.value.includes('Other')); }
-function handleProfileCarOther()  { const s=document.getElementById('p-car');  document.getElementById('p-car-other').classList.toggle('hidden',s.value!=='__other__'); }
-function handleProfileAreaOther() { const s=document.getElementById('p-area'); document.getElementById('p-area-other').classList.toggle('hidden',s.value!=='__other__'); }
-function handleAuthAreaOther()    { const s=document.getElementById('au-area'); document.getElementById('au-area-other').classList.toggle('hidden',s.value!=='__other__'); }
-
-// ════════════════════════════════════════
-//  FIND & FILTER
-// ════════════════════════════════════════
-
-function toggleFilter(el, k) {
-  el.classList.toggle('on');
-  activeFilters.has(k) ? activeFilters.delete(k) : activeFilters.add(k);
-  filterRides();
-}
-function getFromVal() {
-  const sel=document.getElementById('f-from');
-  return sel.value==='__other__' ? document.getElementById('f-from-other').value.trim() : sel.value;
-}
-function getToVal() {
-  const sel=document.getElementById('f-to');
-  return sel.value==='__other__' ? document.getElementById('f-to-other').value.trim() : sel.value;
-}
-function filterRides() {
-  const from=getFromVal(), to=getToVal();
-  let r=[...ALL_RIDES];
-  if(from) r=r.filter(x=>x.from.toLowerCase().includes(from.toLowerCase()));
-  if(to)   r=r.filter(x=>x.to.toLowerCase().includes(to.toLowerCase()));
-  if(activeFilters.has('ac'))       r=r.filter(x=>x.prefs?.some(p=>p.includes('AC')));
-  if(activeFilters.has('female'))   r=r.filter(x=>x.tags?.some(t=>t.includes('Female')));
-  if(activeFilters.has('daily'))    r=r.filter(x=>x.tags?.includes('Daily'));
-  if(activeFilters.has('students')) r=r.filter(x=>x.tags?.some(t=>t.includes('Student')));
-  if(activeFilters.has('verified')) r=r.filter(x=>x.tags?.includes('Verified'));
-  if(activeFilters.has('morning'))  r=r.filter(x=>parseInt(x.time)<9);
-  if(activeFilters.has('bike'))     r=r.filter(x=>x.vtype==='bike');
-  if(activeFilters.has('car'))      r=r.filter(x=>x.vtype==='car');
-  if(activeFilters.has('pillion'))  r=r.filter(x=>x.vtype==='bike'&&x.total===1);
-  renderRides(r);
-}
 function renderRides(list) {
-  const el=document.getElementById('results-list');
-  if(!el) return;
-  if(!list.length) {
-    el.innerHTML='<div class="no-results">😔 No rides found.<br><small>Try removing filters or changing the route.</small></div>';
+  const el = $('results-list');
+  if (!el) return;
+
+  // Apply active filters
+  const from = getFromVal(), to = getToVal();
+  let r = [...list];
+  if (from) r = r.filter(x => x.from?.toLowerCase().includes(from.toLowerCase()));
+  if (to)   r = r.filter(x => x.to?.toLowerCase().includes(to.toLowerCase()));
+  if (activeFilters.has('ac'))       r = r.filter(x => x.prefs?.some(p=>p.includes('AC')));
+  if (activeFilters.has('female'))   r = r.filter(x => x.tags?.some(t=>t.includes('Female')));
+  if (activeFilters.has('daily'))    r = r.filter(x => x.tags?.includes('Daily'));
+  if (activeFilters.has('students')) r = r.filter(x => x.tags?.some(t=>t.includes('Student')));
+  if (activeFilters.has('verified')) r = r.filter(x => x.tags?.includes('Verified'));
+  if (activeFilters.has('morning'))  r = r.filter(x => parseInt(x.time) < 9);
+  if (activeFilters.has('bike'))     r = r.filter(x => x.vtype === 'bike');
+  if (activeFilters.has('car'))      r = r.filter(x => x.vtype === 'car');
+  if (activeFilters.has('pillion'))  r = r.filter(x => x.vtype === 'bike' && x.total === 1);
+
+  if (!r.length) {
+    el.innerHTML = `<div class="no-results">
+      ${list.length === 0
+        ? '😔 No rides posted yet in Karachi. <button class="btn-ghost" onclick="showSection(\'offer\')">Be the first to offer a ride →</button>'
+        : '😔 No rides match your filters. Try removing some filters.'}
+    </div>`;
     return;
   }
-  el.innerHTML=list.map(r=>`
-    <div class="ride-card" onclick="viewDetail('${r.id}')">
-      <div class="avatar rc-av" style="background:${r.color};color:${r.tc}">${r.init}</div>
+
+  el.innerHTML = r.map(ride => `
+    <div class="ride-card" onclick="viewDetail('${ride.id}')">
+      <div class="avatar rc-av" style="background:${ride.color};color:${ride.tc}">${ride.init}</div>
       <div>
-        <div class="rc-route">${r.from} → ${r.to}</div>
-        <div class="rc-meta">${r.name} · ${r.vtype==='bike'?'🏍️':'🚗'} ${r.car} · ${r.time} · ${r.ml} km/L</div>
+        <div class="rc-route">${ride.from} → ${ride.to}</div>
+        <div class="rc-meta">${ride.name} · ${ride.vtype==='bike'?'🏍️':'🚗'} ${ride.car} · ${ride.time} · ${ride.ml} km/L</div>
         <div class="rc-tags">
-          <span class="tag ${r.vtype==='bike'?'tag-blue':'tag-green'}">${r.vtype==='bike'?'🏍️ Bike':'🚗 Car'}</span>
-          ${(r.tags||[]).filter(t=>t!=='Car'&&t!=='Bike').map(t=>`<span class="tag${t==='Verified'?' tag-green':t.includes('Female')?' tag-blue':''}">${t}</span>`).join('')}
-          ${r.isLive?'<span class="tag tag-green">🔴 Live</span>':''}
+          <span class="tag ${ride.vtype==='bike'?'tag-blue':'tag-green'}">${ride.vtype==='bike'?'🏍️ Bike':'🚗 Car'}</span>
+          ${(ride.tags||[]).filter(t=>t!=='Car'&&t!=='Bike').map(t=>`<span class="tag${t==='Verified'?' tag-green':t.includes('Female')?' tag-blue':''}">${t}</span>`).join('')}
         </div>
       </div>
       <div class="rc-right">
-        <div class="rc-cost">Rs.${r.cost}</div>
+        <div class="rc-cost">Rs.${ride.cost}</div>
         <div class="rc-cost-lbl">per person / trip</div>
-        <div class="rc-seats">${r.seats} seat${r.seats!==1?'s':''} left of ${r.total}</div>
-        <button class="btn btn-red btn-sm" style="margin-top:.4rem;width:100%" onclick="event.stopPropagation();viewDetail('${r.id}')">View Details →</button>
+        <div class="rc-seats">${ride.seats} seat${ride.seats!==1?'s':''} left of ${ride.total}</div>
+        <button class="btn btn-red btn-sm" style="margin-top:.4rem;width:100%" onclick="event.stopPropagation();viewDetail('${ride.id}')">View Details →</button>
       </div>
     </div>
   `).join('');
+
+  // Store globally for detail lookup
+  window._loadedRides = list;
 }
 
 // ════════════════════════════════════════
-//  RIDE DETAIL
+//  FIRESTORE — RIDE DETAIL
 // ════════════════════════════════════════
 
 function estimateArr(time, dist) {
-  const clean=time.replace(/ AM| PM/,'');
-  const [hh,mm]=clean.split(':').map(Number);
-  const mins=Math.round(dist/28*60)+8;
-  const total=mm+mins;
-  const arrH=hh+Math.floor(total/60), arrM=total%60;
+  const clean = time.replace(/ AM| PM/,'');
+  const [hh, mm] = clean.split(':').map(Number);
+  const mins = Math.round(dist/28*60) + 8;
+  const total = mm + mins;
+  const arrH = hh + Math.floor(total/60), arrM = total%60;
   return `${arrH}:${arrM.toString().padStart(2,'0')} ${arrH<12?'AM':'PM'}`;
 }
-function starsHTML(r) { const f=Math.floor(r); return '★'.repeat(f)+'☆'.repeat(5-f); }
 
-function viewDetail(id) {
-  const r = ALL_RIDES.find(x => x.id === id || x.id === String(id));
-  if (!r) return;
+async function viewDetail(id) {
+  // First try loaded rides cache, then fetch from Firestore
+  let r = (window._loadedRides||[]).find(x=>x.id===id);
+  if (!r && FB()) {
+    try {
+      const snap = await FB().getDoc(FB().doc(FB().db,'rides',id));
+      if (snap.exists()) r = { id: snap.id, ...snap.data(), init:(snap.data().name||'?')[0].toUpperCase() };
+    } catch(e) { showToast('Could not load ride details.','err'); return; }
+  }
+  if (!r) { showToast('Ride not found.','err'); return; }
+
   const d = (DIST[r.from]&&DIST[r.from][r.to]) || 12;
   const tripCost = Math.round((d/r.ml)*PETROL);
-  const taken = r.total-r.seats;
-  const arr = estimateArr(r.time, d);
-  const isBike = r.vtype==='bike';
-  const vIcon = isBike?'🏍️':'🚗';
-  const waNum = formatWANumber(r.phone||'03001234567');
+  const taken = r.total - r.seats;
+  const isBike = r.vtype === 'bike';
+  const vIcon = isBike ? '🏍️' : '🚗';
+  const waNum = formatWANumber(r.phone||'');
   const waMsg = encodeURIComponent(`Salam ${r.name}! I found your ride on SaathChalo — ${r.from} → ${r.to} at ${r.time}. Can I join? (Rs.${r.cost}/trip)`);
 
-  document.getElementById('detail-content').innerHTML=`
+  $('detail-content').innerHTML = `
     <div class="detail-grid">
       <div>
         <div class="detail-card">
           <h3>📍 Route</h3>
           <div class="route-line">
             <div class="rdot"><div class="rdot-place">${r.from}</div><div class="rdot-time">Departure · ${r.time}</div></div>
-            <div class="rdot"><div class="rdot-place">${r.to}</div><div class="rdot-time">Est. arrival · ${arr}</div></div>
+            <div class="rdot"><div class="rdot-place">${r.to}</div><div class="rdot-time">Est. arrival · ${estimateArr(r.time, d)}</div></div>
           </div>
           <div class="map-ph">
             <span style="font-size:2rem;position:relative;z-index:1">${vIcon}</span>
@@ -1639,41 +1293,42 @@ function viewDetail(id) {
           </div>
         </div>
         <div class="detail-card">
-          <h3>${isBike?'🏍️ Rider Profile':'🚗 Driver Profile'}</h3>
+          <h3>${isBike?'🏍️ Rider':'🚗 Driver'} Profile</h3>
           <div class="driver-profile-row">
-            <div class="avatar dp-av" style="background:${r.color};color:${r.tc}">${r.init}</div>
+            <div class="avatar dp-av" style="background:${r.color||'#E8380D'};color:${r.tc||'#fff'}">${r.init}</div>
             <div>
               <div class="dp-name">${r.name}</div>
-              <div class="dp-meta">${vIcon} ${r.car} · ${r.plate||''} · ${r.ml} km/L</div>
-              <div class="dp-rating"><span style="color:#F4C430">${starsHTML(r.rating)}</span><span>${r.rating} · ${r.trips} rides · Since ${r.joined||'2026'}</span></div>
+              <div class="dp-meta">${vIcon} ${r.car} · ${r.plate||'—'} · ${r.ml} km/L</div>
+              <div class="dp-rating">
+                <span style="color:#F4C430">${starsHTML(r.rating||0)}</span>
+                <span>${r.rating ? r.rating.toFixed(1)+' rating' : 'No ratings yet'} · ${r.ridesDriven||r.trips||0} rides</span>
+              </div>
             </div>
           </div>
-          <div style="font-size:.82rem;color:var(--muted);padding:.8rem;background:var(--black);border:1px solid var(--border);line-height:1.6;margin-bottom:.8rem">"${r.about}"</div>
-          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <div style="font-size:.82rem;color:var(--muted);padding:.8rem;background:var(--black);border:1px solid var(--border);line-height:1.6;margin-bottom:.8rem">"${r.about||'Posted on SaathChalo.'}"</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem">
             ${(r.prefs||[]).map(p=>`<span class="tag tag-green">${p}</span>`).join('')}
             ${(r.tags||[]).filter(t=>t!=='Car'&&t!=='Bike').map(t=>`<span class="tag${t==='Verified'?' tag-green':''}">${t}</span>`).join('')}
           </div>
-          <!-- WhatsApp Button — ONLY shown after join request accepted (or for demo) -->
-          <div style="margin-top:1rem;padding:1rem;background:var(--black);border:1px solid var(--border)">
-            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">📱 Contact ${r.name} directly on WhatsApp</div>
+          <div style="padding:1rem;background:var(--black);border:1px solid var(--border)">
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">📱 Contact ${r.name} on WhatsApp</div>
             <a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener"
-               style="display:flex;align-items:center;gap:.6rem;background:#25D366;color:#fff;padding:.65rem 1rem;font-weight:700;font-size:.85rem;text-decoration:none;transition:opacity 150ms"
-               onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+               style="display:flex;align-items:center;gap:.6rem;background:#25D366;color:#fff;padding:.65rem 1rem;font-weight:700;font-size:.85rem;text-decoration:none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              Open WhatsApp Chat with ${r.name}
+              Open WhatsApp Chat
             </a>
-            <div style="font-size:.68rem;color:var(--muted);margin-top:.5rem">Clicking opens WhatsApp with a pre-written message. A pre-filled message about this ride is ready to send.</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:.5rem">Opens WhatsApp with a pre-written message about this ride. The message is editable before sending.</div>
           </div>
         </div>
         <div class="detail-card">
-          <h3>💺 Seat${isBike?' (Pillion)':''} Availability</h3>
+          <h3>💺 Seat Availability</h3>
           <div style="font-size:.8rem;color:var(--muted);margin-bottom:.7rem">${r.seats} of ${r.total} seat${r.total>1?'s':''} available</div>
           <div class="seat-slots">
             <div class="slot" title="${isBike?'Rider':'Driver'}">${vIcon}</div>
             ${Array(taken).fill(`<div class="slot taken" title="Taken">✓</div>`).join('')}
             ${Array(r.seats).fill(`<div class="slot free" title="Available">+</div>`).join('')}
           </div>
-          ${isBike?`<div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.5">⚠️ Bike pillion — only 1 passenger. Discuss helmet arrangement before meeting.</div>`:''}
+          ${isBike?`<div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.5">⚠️ Bike — only 1 pillion. Discuss helmet before meeting.</div>`:''}
         </div>
       </div>
       <div>
@@ -1681,13 +1336,12 @@ function viewDetail(id) {
           <div style="font-family:var(--fd);font-size:.95rem;margin-bottom:.9rem">📊 Cost Breakdown</div>
           <div class="cb-row"><span class="cl">Distance</span><span class="cv">${d} km</span></div>
           <div class="cb-row"><span class="cl">Petrol rate</span><span class="cv">Rs.${PETROL}/L</span></div>
-          <div class="cb-row"><span class="cl">Full trip fuel cost</span><span class="cv" style="color:var(--red)">Rs.${tripCost}</span></div>
+          <div class="cb-row"><span class="cl">Full fuel cost</span><span class="cv" style="color:var(--red)">Rs.${tripCost}</span></div>
           <div class="cb-row"><span class="cl">Split ${r.total+1} ways</span><span class="cv">÷ ${r.total+1}</span></div>
           <div class="cb-row total"><span class="cl" style="font-weight:700;color:var(--cream)">Your share</span><span class="cv">Rs.${r.cost}</span></div>
           <div style="margin-top:.8rem;padding:.8rem;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.25);font-size:.75rem;color:var(--muted);line-height:1.5">
             💸 Pay <strong style="color:var(--green)">Rs.${r.cost}</strong> to ${r.name} — cash or EasyPaisa.<br>
-            Monthly (26 days): <strong style="color:var(--green)">Rs.${(r.cost*26).toLocaleString()}</strong>
-            vs Rs.${(tripCost*2*26).toLocaleString()} solo.
+            26 days/month: <strong style="color:var(--green)">Rs.${(r.cost*26).toLocaleString()}</strong> vs Rs.${(tripCost*2*26).toLocaleString()} solo.
           </div>
         </div>
         <div class="cost-breakdown">
@@ -1695,156 +1349,813 @@ function viewDetail(id) {
           <ul class="rules-list">
             ${(r.prefs||[]).map(p=>`<li>${p}</li>`).join('')}
             <li>Be at pickup on time</li>
-            ${isBike?'<li>Discuss helmet before meeting</li>':'<li>No food inside vehicle</li>'}
+            ${isBike?'<li>Discuss helmet before meeting</li>':'<li>No food in car</li>'}
             <li>Coordinate via WhatsApp</li>
           </ul>
         </div>
         <div style="display:flex;flex-direction:column;gap:.6rem">
-          ${r.seats>0?`
+          ${r.seats > 0 ? `
             <button class="btn btn-red btn-full" onclick="requestJoin('${r.id}')">Request to Join →</button>
             <a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener"
                class="btn btn-outline btn-full"
-               style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;padding:.75rem 1.5rem;font-size:.9rem;font-weight:600">
+               style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;padding:.75rem 1.5rem">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               WhatsApp ${r.name} Directly
             </a>
-          `:`
+          ` : `
             <button class="btn btn-outline btn-full" style="opacity:.5;cursor:default" disabled>This Ride is Full</button>
             <button class="btn-ghost btn-full btn-sm" style="border:1px solid var(--border);padding:.6rem"
               onclick="showToast('You will be notified if a seat opens!','info')">🔔 Notify Me If Seat Opens</button>
           `}
           <div style="font-size:.7rem;color:var(--muted);text-align:center;line-height:1.5">
-            Request first for a safer introduction. WhatsApp opens with a pre-filled message about this ride.
+            Sending a request notifies the driver. WhatsApp opens with a pre-filled intro message.
           </div>
         </div>
       </div>
     </div>
   `;
+
   document.querySelectorAll('.ap-section').forEach(el=>el.classList.remove('active'));
-  document.getElementById('ap-detail').classList.add('active');
+  $('ap-detail').classList.add('active');
   window.scrollTo(0,0);
 }
 
 function backToFind() {
-  document.getElementById('ap-detail').classList.remove('active');
-  document.getElementById('ap-find').classList.add('active');
+  $('ap-detail').classList.remove('active');
+  $('ap-find').classList.add('active');
 }
 
 // ════════════════════════════════════════
-//  OFFER CALC (live cost preview)
+//  FIRESTORE — SUBMIT RIDE
 // ════════════════════════════════════════
 
-function getOfferFrom() {
-  const s=document.getElementById('o-from');
-  return s&&s.value==='__other__' ? (document.getElementById('o-from-other')?.value||'') : (s?.value||'PECHS');
+async function submitOffer() {
+  if (!requireAuth('post a ride')) return;
+  const isBike = currentVehicleType === 'bike';
+  const fromSel = $('o-from'), toSel = $('o-to');
+  const from = fromSel?.value==='__other__' ? ($('o-from-other')?.value?.trim()||'') : fromSel?.value;
+  const to   = toSel?.value==='__other__'   ? ($('o-to-other')?.value?.trim()||'')   : toSel?.value;
+  const name = $('o-name')?.value?.trim();
+  const wa   = $('o-wa')?.value?.trim();
+  const carSel = $(isBike?'o-bike':'o-car');
+  const carVal = carSel?.value?.includes('Other') ? ($(isBike?'o-bike-other':'o-car-other')?.value?.trim()) : carSel?.value;
+  const mileageEl = $(isBike?'o-mileage-bike':'o-mileage');
+  const mileage = parseFloat(mileageEl?.value || (isBike?35:13));
+  const seats = parseInt($('o-seats')?.value||2);
+  const time  = $('o-time')?.value||'08:00';
+  const plate = $(isBike?'o-plate-bike':'o-plate')?.value?.trim();
+  const schedule = document.querySelector('#ap-offer select:nth-of-type(4)')?.value || 'Mon–Fri (Daily)';
+
+  if (!from) { showToast('Select your starting area.','err'); return; }
+  if (!to)   { showToast('Select your destination.','err'); return; }
+  if (!name) { showToast('Enter your name.','err'); return; }
+  if (!wa)   { showToast('Enter your WhatsApp number.','err'); return; }
+
+  const dist = (DIST[from]&&DIST[from][to]) || 12;
+  const cost = Math.round((dist/mileage)*PETROL/(seats+1));
+  const prefs = Array.from(document.querySelectorAll('#ap-offer .pref-tog.on')).map(el=>el.textContent.trim());
+  const tags = [];
+  if (!isBike) tags.push('Car'); else tags.push('Bike');
+  if (prefs.some(p=>p.includes('AC'))) tags.push('AC');
+  if (prefs.some(p=>p.includes('Female'))) tags.push('Female Only');
+  if (prefs.some(p=>p.includes('Student'))) tags.push('Students');
+  if (schedule.includes('Daily')||schedule.includes('Mon–Fri')) tags.push('Daily');
+
+  const avatarColors = ['#E8380D','#2ECC71','#3B82F6','#9B59B6','#F4C430','#E91E63'];
+  const color = avatarColors[Math.floor(Math.random()*avatarColors.length)];
+
+  const rideData = {
+    driverUid: window._currentUser.uid,
+    name, phone: wa, from, to,
+    time: time.includes(':') ? convertTo12Hr(time) : time,
+    car: carVal, plate: plate||'', ml: mileage,
+    seats, total: seats, cost, vtype: isBike?'bike':'car',
+    prefs, tags, active: true, color, tc: '#fff',
+    about: `${isBike?'Bike':'Car'} ride posted on SaathChalo. ${prefs.join(', ')}.`,
+    schedule, rating: 0, totalRatings: 0, ridesDriven: 0,
+    createdAt: FB().serverTimestamp(),
+  };
+
+  const btn = document.querySelector('#ap-offer .btn-red.btn-full');
+  if (btn) { btn.disabled=true; btn.textContent='Posting…'; }
+  try {
+    await FB().addDoc(FB().collection(FB().db,'rides'), rideData);
+    await FB().updateDoc(FB().doc(FB().db,'users',window._currentUser.uid), {
+      ridesDriven: FB().increment(1)
+    });
+    // Reset form
+    ['o-name','o-wa','o-plate','o-plate-bike'].forEach(id=>{const e=$(id);if(e)e.value='';});
+    document.querySelectorAll('#ap-offer .pref-tog.on').forEach(el=>el.classList.remove('on'));
+    showToast('✓ Ride posted! It now appears live in Find a Ride.');
+    setTimeout(()=>showSection('myrides'),1200);
+  } catch(e) {
+    showToast('Error posting ride: '+e.message,'err');
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='Post My Ride →'; }
+  }
 }
-function getOfferTo() {
-  const s=document.getElementById('o-to');
-  return s&&s.value==='__other__' ? (document.getElementById('o-to-other')?.value||'') : (s?.value||'I.I. Chundrigar (Downtown)');
+
+function convertTo12Hr(time24) {
+  const [h,m] = time24.split(':').map(Number);
+  return `${h===0?12:h>12?h-12:h}:${m.toString().padStart(2,'0')} ${h<12?'AM':'PM'}`;
 }
-function offerCalc() {
-  const from=getOfferFrom(), to=getOfferTo();
+
+// ════════════════════════════════════════
+//  FIRESTORE — JOIN REQUEST
+// ════════════════════════════════════════
+
+async function requestJoin(rideId) {
+  if (!requireAuth('request to join a ride')) return;
+  const ride = (window._loadedRides||[]).find(x=>x.id===rideId);
+  const user = window._currentUser;
+
+  if (ride && ride.driverUid === user.uid) {
+    showToast('You cannot join your own ride.','err'); return;
+  }
+
+  const btn = document.querySelector(`[onclick="requestJoin('${rideId}')"]`);
+  if (btn) { btn.disabled=true; btn.textContent='Sending…'; }
+  try {
+    // Check for duplicate request
+    const existing = await FB().getDocs(
+      FB().query(FB().collection(FB().db,'requests'),
+        FB().where('rideId','==',rideId), FB().where('riderId','==',user.uid))
+    );
+    if (!existing.empty) { showToast('You already sent a request for this ride.','info'); return; }
+
+    await FB().addDoc(FB().collection(FB().db,'requests'), {
+      rideId, riderId: user.uid, riderName: user.displayName||user.email.split('@')[0],
+      riderEmail: user.email, driverUid: ride?.driverUid||'',
+      from: ride?.from||'', to: ride?.to||'', status: 'pending',
+      createdAt: FB().serverTimestamp(),
+    });
+    // Notify driver
+    if (ride?.driverUid) {
+      await FB().addDoc(FB().collection(FB().db,'notifications'), {
+        uid: ride.driverUid, type: 'request',
+        icon: '🙋',
+        title: `${user.displayName||'Someone'} wants to join your ride`,
+        body: `${user.displayName||user.email.split('@')[0]} requested to join your ${ride.from} → ${ride.to} ride.`,
+        rideId, requesterId: user.uid, read: false,
+        createdAt: FB().serverTimestamp(),
+      });
+    }
+    showToast('✓ Request sent! The driver will be notified.');
+  } catch(e) {
+    showToast('Error: '+e.message,'err');
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='Request to Join →'; }
+  }
+}
+
+// ════════════════════════════════════════
+//  FIRESTORE — MY RIDES (real-time)
+// ════════════════════════════════════════
+
+function subscribeToMyRides(uid) {
+  if (!FB() || !uid) return;
+  loading('my-offered');
+  loading('my-joined');
+  loading('my-history');
+
+  // Offered rides (driver)
+  const offeredQ = FB().query(
+    FB().collection(FB().db,'rides'),
+    FB().where('driverUid','==',uid),
+    FB().orderBy('createdAt','desc')
+  );
+  FB().onSnapshot(offeredQ, async (snap) => {
+    const rides = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const active  = rides.filter(r=>r.active);
+    const history = rides.filter(r=>!r.active);
+
+    // Count badge
+    const countEl = $('mrt-offered-count');
+    if (countEl) countEl.textContent = active.length ? `(${active.length})` : '';
+
+    if (!active.length) {
+      empty('my-offered','You haven\'t offered any rides yet. <button class="btn-ghost" onclick="showSection(\'offer\')">Post your first ride →</button>');
+    } else {
+      // For each active ride, also fetch pending requests
+      const ridesWithRequests = await Promise.all(active.map(async r => {
+        const reqSnap = await FB().getDocs(
+          FB().query(FB().collection(FB().db,'requests'),
+            FB().where('rideId','==',r.id), FB().where('status','==','pending'))
+        );
+        return { ...r, pendingRequests: reqSnap.docs.map(d=>({id:d.id,...d.data()})) };
+      }));
+      $('my-offered').innerHTML = ridesWithRequests.map(r => renderOfferedCard(r)).join('');
+    }
+
+    // History tab
+    if (!history.length) {
+      empty('my-history','No completed rides yet.');
+    } else {
+      $('my-history').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        ${history.map(r=>`
+          <div class="mrc" style="margin:0">
+            <div class="mrc-hdr"><div>
+              <div class="mrc-route" style="font-size:.85rem">${r.from} → ${r.to}</div>
+              <div class="mrc-meta">${r.time} · ${r.car}</div>
+            </div><span class="badge badge-muted">Done</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem">
+              <div style="font-family:var(--fd);font-size:1rem;color:var(--green)">Rs.${r.cost}</div>
+              <div class="stars">${starsHTML(r.rating||0)}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    }
+
+    // Dashboard stats
+    set('dd-rides', rides.length);
+    set('dd-fuel', 'Rs.'+(rides.reduce((a,r)=>a+(r.cost*(r.total||1)*26),0)).toLocaleString());
+
+    // Dashboard routes
+    if (!active.length) {
+      empty('dashboard-routes','No active routes. <button class="btn-ghost" onclick="showSection(\'offer\')">Post your first ride →</button>');
+    } else {
+      $('dashboard-routes').innerHTML = active.map(r=>`
+        <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <div>
+            <div style="font-family:var(--fd)">${r.from} → ${r.to}</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:.25rem">${r.schedule||'Daily'} · ${r.time} · ${r.seats} seat${r.seats!==1?'s':''} left · ${r.car}</div>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center">
+            <button class="btn btn-outline btn-sm" onclick="pauseRide('${r.id}','${r.active}')">⏸ Pause</button>
+            <button class="btn-ghost btn-sm" onclick="deleteRide('${r.id}')">🗑 Delete</button>
+          </div>
+        </div>`).join('');
+    }
+  });
+
+  // Joined rides (passenger)
+  const joinedQ = FB().query(
+    FB().collection(FB().db,'requests'),
+    FB().where('riderId','==',uid),
+    FB().orderBy('createdAt','desc')
+  );
+  FB().onSnapshot(joinedQ, snap => {
+    const reqs = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const countEl = $('mrt-joined-count');
+    if (countEl) countEl.textContent = reqs.length ? `(${reqs.length})` : '';
+    if (!reqs.length) {
+      empty('my-joined','You haven\'t joined any rides yet. <button class="btn-ghost" onclick="showSection(\'find\')">Find a ride →</button>');
+    } else {
+      $('my-joined').innerHTML = reqs.map(req => `
+        <div class="mrc">
+          <div class="mrc-hdr"><div>
+            <div class="mrc-route">${req.from} → ${req.to}</div>
+            <div class="mrc-meta">Requested ${timeAgo(req.createdAt)}</div>
+          </div>
+          <span class="badge ${req.status==='accepted'?'badge-green':req.status==='declined'?'badge-red':'badge-yellow'}">
+            ${req.status==='accepted'?'✓ Confirmed':req.status==='declined'?'✕ Declined':'⏳ Pending'}
+          </span></div>
+          <div class="mrc-actions">
+            ${req.status==='accepted' ? `
+              <button class="btn btn-outline btn-sm" onclick="showSection('active')">🟢 Track</button>
+              <button class="btn btn-outline btn-sm" onclick="openRateModal()">⭐ Rate</button>
+            ` : req.status==='pending' ? `
+              <button class="btn-ghost btn-sm" onclick="cancelRequest('${req.id}')">✕ Cancel</button>
+            ` : ''}
+          </div>
+        </div>`).join('');
+    }
+  });
+
+  // Dashboard pending requests
+  const pendingQ = FB().query(
+    FB().collection(FB().db,'requests'),
+    FB().where('driverUid','==',uid), FB().where('status','==','pending')
+  );
+  FB().onSnapshot(pendingQ, snap => {
+    const reqs = snap.docs.map(d=>({id:d.id,...d.data()}));
+    set('dd-pending', reqs.length);
+    if (!reqs.length) {
+      empty('dashboard-requests','No pending requests. Passengers will appear here when they request your rides.');
+    } else {
+      $('dashboard-requests').innerHTML = reqs.map(req=>`
+        <div class="req-card">
+          <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--red)">${(req.riderName||'?')[0].toUpperCase()}</div>
+          <div>
+            <div class="req-name">${req.riderName}</div>
+            <div class="req-meta">${req.riderEmail} · Requested ${timeAgo(req.createdAt)}</div>
+            <div class="req-area">📍 ${req.from} → ${req.to}</div>
+          </div>
+          <div class="req-actions">
+            <button class="btn btn-green btn-sm" onclick="acceptRequest('${req.id}','${req.rideId}','${req.riderId}')">✓ Accept</button>
+            <button class="btn btn-outline btn-sm" onclick="declineRequest('${req.id}','${req.riderId}')">✕ Decline</button>
+          </div>
+        </div>`).join('');
+    }
+  });
+}
+
+function renderOfferedCard(r) {
+  const hasPending = r.pendingRequests && r.pendingRequests.length > 0;
+  return `<div class="mrc">
+    <div class="mrc-hdr"><div>
+      <div class="mrc-route">${r.from} → ${r.to}</div>
+      <div class="mrc-meta">${r.schedule||'Daily'} · ${r.time} · ${r.car} · ${r.ml} km/L</div>
+    </div>
+    <span class="badge ${hasPending?'badge-yellow':'badge-green'}">${hasPending?`${r.pendingRequests.length} Pending`:'Active'}</span></div>
+    <div class="mrc-body">
+      <div>
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:.35rem">${r.seats} seat${r.seats!==1?'s':''} left of ${r.total}</div>
+        ${hasPending ? `<div style="font-size:.78rem;color:var(--yellow);margin-top:.3rem">⏳ ${r.pendingRequests.length} passenger${r.pendingRequests.length>1?'s':''} waiting for your response</div>` : ''}
+      </div>
+      <div style="text-align:right">
+        <div class="earn-val">Rs.${r.cost * r.total}<span style="font-size:.75rem;font-family:var(--fb);color:var(--muted)">/day</span></div>
+        <div class="earn-lbl">Max you collect</div>
+      </div>
+    </div>
+    <div class="mrc-actions">
+      <button class="btn btn-outline btn-sm" onclick="showSection('dashboard')">📊 Manage</button>
+      <button class="btn-ghost btn-sm" onclick="pauseRide('${r.id}',${r.active})">⏸ Pause</button>
+      <button class="btn-ghost btn-sm" onclick="deleteRide('${r.id}')">🗑 Delete</button>
+    </div>
+  </div>`;
+}
+
+async function acceptRequest(reqId, rideId, riderId) {
+  if (!FB()) return;
+  try {
+    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'accepted' });
+    // Decrement available seats
+    await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { seats: FB().increment(-1) });
+    // Notify rider
+    await FB().addDoc(FB().collection(FB().db,'notifications'), {
+      uid: riderId, type: 'accepted', icon: '✅',
+      title: 'Your ride request was accepted!',
+      body: 'The driver confirmed your seat. Check My Rides for details.',
+      rideId, read: false, createdAt: FB().serverTimestamp(),
+    });
+    showToast('✓ Request accepted! Rider has been notified.');
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+}
+
+async function declineRequest(reqId, riderId) {
+  if (!FB()) return;
+  try {
+    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'declined' });
+    await FB().addDoc(FB().collection(FB().db,'notifications'), {
+      uid: riderId, type: 'declined', icon: '❌',
+      title: 'Ride request declined',
+      body: 'The driver declined your request. Find another ride.',
+      read: false, createdAt: FB().serverTimestamp(),
+    });
+    showToast('Request declined. Rider has been notified.','info');
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+}
+
+async function cancelRequest(reqId) {
+  if (!FB()) return;
+  try {
+    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'cancelled' });
+    showToast('Request cancelled.','info');
+  } catch(e) { showToast('Error: '+e.message,'err'); }
+}
+
+async function pauseRide(rideId, currentlyActive) {
+  if (!FB()) return;
+  const newState = currentlyActive === 'true' ? false : true;
+  await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { active: newState });
+  showToast(newState ? 'Ride activated.' : 'Ride paused. It won\'t appear in search.','info');
+}
+
+async function deleteRide(rideId) {
+  if (!confirm('Delete this ride? This cannot be undone.')) return;
+  if (!FB()) return;
+  await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { active: false });
+  showToast('Ride deleted.','err');
+}
+
+// ════════════════════════════════════════
+//  FIRESTORE — NOTIFICATIONS (real-time)
+// ════════════════════════════════════════
+
+function subscribeToNotifications(uid) {
+  if (!FB() || !uid) return;
+  const q = FB().query(
+    FB().collection(FB().db,'notifications'),
+    FB().where('uid','==',uid),
+    FB().orderBy('createdAt','desc')
+  );
+  FB().onSnapshot(q, snap => {
+    const notifs = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const unread = notifs.filter(n=>!n.read).length;
+
+    // Update badge
+    const badge = $('nb-badge');
+    if (badge) { badge.textContent = unread||''; badge.style.display = unread?'':'none'; }
+    const ndot = $('ndot');
+    if (ndot) ndot.style.display = unread ? '' : 'none';
+
+    // Render list
+    const el = $('notif-list');
+    if (!el) return;
+    if (!notifs.length) {
+      el.innerHTML = `<div class="no-results">No notifications yet.</div>`; return;
+    }
+    el.innerHTML = notifs.map(n=>`
+      <div class="ni ${n.read?'':'unread'}" onclick="markNotifRead('${n.id}')">
+        <div class="ni-icon">${n.icon||'🔔'}</div>
+        <div>
+          <div class="ni-title">${n.title}</div>
+          <div class="ni-body">${n.body}</div>
+          ${n.type==='request'?`
+            <div style="display:flex;gap:.5rem;margin-top:.6rem">
+              <button class="btn btn-green btn-sm" onclick="event.stopPropagation();acceptRequest('${n.id}','${n.rideId}','${n.requesterId}')">✓ Accept</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();declineRequest('${n.id}','${n.requesterId}')">✕ Decline</button>
+            </div>` : ''}
+        </div>
+        <div class="ni-time">${timeAgo(n.createdAt)}</div>
+      </div>`).join('');
+
+    set('notif-sub', unread ? `${unread} unread` : 'All caught up ✓');
+  });
+}
+
+async function markNotifRead(id) {
+  if (!FB()) return;
+  await FB().updateDoc(FB().doc(FB().db,'notifications',id), { read: true }).catch(()=>{});
+}
+
+async function markAllRead() {
+  const user = window._currentUser;
+  if (!user || !FB()) return;
+  const snap = await FB().getDocs(
+    FB().query(FB().collection(FB().db,'notifications'),
+      FB().where('uid','==',user.uid), FB().where('read','==',false))
+  );
+  snap.docs.forEach(d => FB().updateDoc(d.ref, { read: true }));
+  showToast('All notifications marked as read.','info');
+}
+
+// ════════════════════════════════════════
+//  FIRESTORE — USER PROFILE
+// ════════════════════════════════════════
+
+async function loadUserProfile(uid) {
+  if (!FB()) return;
+  try {
+    const snap = await FB().getDoc(FB().doc(FB().db,'users',uid));
+    if (!snap.exists()) return;
+    const d = snap.data();
+
+    // Sidebar / nav name
+    const displayName = d.name || window._currentUser?.displayName || window._currentUser?.email?.split('@')[0] || '—';
+
+    // Profile card
+    set('profile-display-name', displayName);
+    set('profile-display-role', `${d.area||'Karachi'}`);
+    set('profile-av-init', displayName[0]?.toUpperCase()||'?');
+
+    const rating = d.totalRatings > 0 ? (d.rating / d.totalRatings).toFixed(1) : null;
+    $('profile-stars').innerHTML = starsHTML(rating ? parseFloat(rating) : 0);
+    set('profile-rating-line', rating ? `${rating} rating · ${d.ridesDriven||0} rides driven` : 'No rides yet');
+    set('ps-driven', d.ridesDriven||0);
+    set('ps-joined', d.ridesJoined||0);
+    set('ps-saved', 'Rs.'+((d.ridesJoined||0)*110).toLocaleString());
+
+    // Vehicle card
+    if (d.vehicle?.model) {
+      $('profile-vehicle-card').innerHTML = `
+        <div style="font-size:1.8rem">${d.vehicle.type==='bike'?'🏍️':'🚗'}</div>
+        <div>
+          <div style="font-weight:600;font-size:.9rem">${d.vehicle.model} ${d.vehicle.year||''}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">${d.vehicle.plate||'—'} · ${d.vehicle.color||''} · ${d.vehicle.mileage||'—'} km/L</div>
+        </div>`;
+    }
+
+    // Dashboard stats
+    if (rating) set('dd-rating', '★ '+rating);
+    set('dd-rides', d.ridesDriven||0);
+
+    // Form fields
+    setVal('p-name', d.name);
+    setVal('p-phone', d.phone);
+    setVal('p-email', d.email || window._currentUser?.email);
+
+    // Area select
+    const areaEl = $('p-area');
+    if (areaEl && d.area) {
+      const opt = Array.from(areaEl.options).find(o=>o.value===d.area||o.text===d.area);
+      if (opt) areaEl.value = opt.value;
+      else {
+        areaEl.value = '__other__';
+        handleProfileAreaOther();
+        setVal('p-area-other', d.area);
+      }
+    }
+
+    // Gender
+    if (d.gender) setVal('p-gender', d.gender);
+
+    // Vehicle fields
+    if (d.vehicle) {
+      const carEl = $('p-car');
+      if (carEl && d.vehicle.model) {
+        const opt = Array.from(carEl.options).find(o=>o.value===d.vehicle.model||o.text===d.vehicle.model);
+        if (opt) carEl.value = opt.value;
+        else { carEl.value='__other__'; handleProfileCarOther(); setVal('p-car-other', d.vehicle.model); }
+      }
+      setVal('p-car-year', d.vehicle.year);
+      setVal('p-plate', d.vehicle.plate);
+      setVal('p-mileage', d.vehicle.mileage);
+      setVal('p-color', d.vehicle.color);
+      if (d.vehicle.ac !== undefined) setVal('p-ac', d.vehicle.ac?'Yes':'No');
+    }
+
+    // Prefs toggles
+    if (d.prefs?.length) {
+      document.querySelectorAll('#profile-prefs .pref-tog').forEach(el => {
+        const text = el.textContent.replace(/[^\w\s]/g,'').trim().toLowerCase();
+        if (d.prefs.some(p=>p.toLowerCase().includes(text.split(' ')[0]))) el.classList.add('on');
+      });
+    }
+
+    // Reviews
+    loadReviews(uid);
+  } catch(e) { console.warn('Profile load failed', e); }
+}
+
+async function loadReviews(uid) {
+  if (!FB()) return;
+  try {
+    const snap = await FB().getDocs(
+      FB().query(FB().collection(FB().db,'reviews'), FB().where('driverUid','==',uid), FB().orderBy('createdAt','desc'))
+    );
+    const reviews = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const el = $('profile-reviews');
+    if (!el) return;
+    if (!reviews.length) {
+      el.innerHTML='<div style="font-size:.82rem;color:var(--muted);padding:1rem;background:var(--black);border:1px solid var(--border)">No reviews yet. Complete rides to receive ratings.</div>';
+      return;
+    }
+    el.innerHTML = reviews.map(r=>`
+      <div class="review-item">
+        <div class="review-hdr">
+          <div style="font-weight:600;font-size:.85rem">${r.raterName}</div>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <div class="stars" style="font-size:.8rem">${starsHTML(r.rating)}</div>
+            <span style="font-size:.7rem;color:var(--muted)">${timeAgo(r.createdAt)}</span>
+          </div>
+        </div>
+        <div style="font-size:.8rem;color:var(--muted)">${r.comment||''}</div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+async function saveProfile() {
+  if (!requireAuth('save profile')) return;
+  const uid = window._currentUser.uid;
+
+  const areaEl = $('p-area');
+  const area = areaEl?.value==='__other__' ? ($('p-area-other')?.value?.trim()||'') : areaEl?.value;
+  const carEl = $('p-car');
+  const carModel = carEl?.value==='__other__' ? ($('p-car-other')?.value?.trim()||'') : (carEl?.value||'');
+
+  const prefs = Array.from(document.querySelectorAll('#profile-prefs .pref-tog.on')).map(el=>el.textContent.trim());
+
+  const updates = {
+    name: $('p-name')?.value?.trim()||'',
+    phone: $('p-phone')?.value?.trim()||'',
+    area, gender: $('p-gender')?.value||'',
+    prefs,
+    vehicle: carModel ? {
+      model: carModel, year: $('p-car-year')?.value||'',
+      plate: $('p-plate')?.value?.trim()||'', mileage: $('p-mileage')?.value||'',
+      color: $('p-color')?.value?.trim()||'', ac: $('p-ac')?.value==='Yes',
+      type: ['CD 70','CG 125','CB 150F','YBR','GS 150','70cc'].some(k=>carModel.includes(k)) ? 'bike' : 'car',
+    } : null,
+    updatedAt: FB().serverTimestamp(),
+  };
+
+  if (!updates.name) { showToast('Name cannot be empty.','err'); return; }
+
+  const btn = document.querySelector('#ap-profile .btn-red');
+  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
+  try {
+    await FB().updateDoc(FB().doc(FB().db,'users',uid), updates);
+    // Refresh card
+    set('profile-display-name', updates.name);
+    set('profile-av-init', updates.name[0]?.toUpperCase()||'?');
+    set('profile-display-role', area||'Karachi');
+    if (updates.vehicle?.model) {
+      $('profile-vehicle-card').innerHTML = `
+        <div style="font-size:1.8rem">${updates.vehicle.type==='bike'?'🏍️':'🚗'}</div>
+        <div>
+          <div style="font-weight:600;font-size:.9rem">${updates.vehicle.model} ${updates.vehicle.year}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">${updates.vehicle.plate} · ${updates.vehicle.color} · ${updates.vehicle.mileage} km/L</div>
+        </div>`;
+    }
+    showToast('✓ Profile saved!');
+  } catch(e) { showToast('Error saving: '+e.message,'err'); }
+  finally { if(btn){btn.disabled=false;btn.textContent='Save Changes';} }
+}
+
+// ════════════════════════════════════════
+//  RATING MODAL
+// ════════════════════════════════════════
+
+let currentRating = 0;
+let currentRatingRideId = null;
+let currentRatingDriverUid = null;
+
+function openRateModal(rideId, driverUid) {
+  currentRatingRideId = rideId;
+  currentRatingDriverUid = driverUid;
+  $('rate-modal').classList.add('open');
+}
+function closeRateModal() { $('rate-modal').classList.remove('open'); }
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('.sp').forEach((s,i)=>s.classList.toggle('lit',i<n));
+}
+
+async function submitRating() {
+  if (!currentRating) { showToast('Please pick a star rating.','err'); return; }
+  if (!requireAuth('rate a ride')) return;
+  const user = window._currentUser;
+  const comment = document.querySelector('#rate-modal textarea')?.value?.trim()||'';
+  const chips = Array.from(document.querySelectorAll('.rate-chip.on')).map(el=>el.textContent);
+
+  try {
+    if (FB() && currentRatingRideId) {
+      // Write review
+      await FB().addDoc(FB().collection(FB().db,'reviews'), {
+        rideId: currentRatingRideId, driverUid: currentRatingDriverUid,
+        raterUid: user.uid, raterName: user.displayName||user.email.split('@')[0],
+        rating: currentRating, comment, chips,
+        createdAt: FB().serverTimestamp(),
+      });
+      // Update driver's rating total
+      if (currentRatingDriverUid) {
+        await FB().updateDoc(FB().doc(FB().db,'users',currentRatingDriverUid), {
+          rating: FB().increment(currentRating), totalRatings: FB().increment(1)
+        });
+      }
+    }
+    closeRateModal();
+    showToast(`✓ ${currentRating}-star rating submitted!`);
+    currentRating=0; currentRatingRideId=null; currentRatingDriverUid=null;
+    document.querySelectorAll('.sp').forEach(s=>s.classList.remove('lit'));
+    document.querySelectorAll('.rate-chip.on').forEach(el=>el.classList.remove('on'));
+  } catch(e) { showToast('Error submitting rating: '+e.message,'err'); }
+}
+
+// ════════════════════════════════════════
+//  ROUTING
+// ════════════════════════════════════════
+
+function goHome() {
+  $('page-landing').classList.add('active');
+  $('page-app').classList.remove('active');
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  $('nl-home').classList.add('active');
+}
+
+function showSection(s) {
+  $('page-landing').classList.remove('active');
+  $('page-app').classList.add('active');
+  document.querySelectorAll('.ap-section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(el=>el.classList.remove('active'));
+  const ap=$('ap-'+s), sl=$('sl-'+s);
+  if (ap) ap.classList.add('active');
+  if (sl) sl.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  const m={find:'nl-find',offer:'nl-offer',myrides:'nl-rides',dashboard:'nl-dash'};
+  if(m[s]) $(m[s]).classList.add('active');
+  window.scrollTo(0,0);
+  if (s==='find') subscribeToRides();
+  if (s==='offer') offerCalc();
+  if (s==='myrides' && window._currentUser) switchMyTab('offered');
+}
+
+// ════════════════════════════════════════
+//  VEHICLE TYPE & FILTER HELPERS
+// ════════════════════════════════════════
+
+function setVehicleType(type) {
+  currentVehicleType = type;
+  const isBike = type==='bike';
+  $('vtype-car').classList.toggle('on',!isBike);
+  $('vtype-bike').classList.toggle('on',isBike);
+  $('car-fields').classList.toggle('hidden',isBike);
+  $('bike-fields').classList.toggle('hidden',!isBike);
+  document.querySelectorAll('.car-only').forEach(el=>el.classList.toggle('hidden',isBike));
+  document.querySelectorAll('.bike-only').forEach(el=>el.classList.toggle('hidden',!isBike));
+  $('vehicle-section-title').textContent = isBike?'🏍️ Bike Details':'🚗 Vehicle Details';
+  offerCalc();
+}
+
+function toggleFilter(el,k){
+  el.classList.toggle('on');
+  activeFilters.has(k)?activeFilters.delete(k):activeFilters.add(k);
+  if (window._loadedRides) renderRides(window._loadedRides);
+}
+
+function getFromVal(){const s=$('f-from');return s?.value==='__other__'?($('f-from-other')?.value?.trim()||''):s?.value||'';}
+function getToVal(){const s=$('f-to');return s?.value==='__other__'?($('f-to-other')?.value?.trim()||''):s?.value||'';}
+
+function handleFromChange(){const s=$('f-from');$('f-from-other').classList.toggle('hidden',s.value!=='__other__');if(s.value!=='__other__'&&window._loadedRides)renderRides(window._loadedRides);}
+function handleToChange(){const s=$('f-to');$('f-to-other').classList.toggle('hidden',s.value!=='__other__');if(s.value!=='__other__'&&window._loadedRides)renderRides(window._loadedRides);}
+function filterRides(){if(window._loadedRides)renderRides(window._loadedRides);}
+function handleOfferFrom(){const s=$('o-from');$('o-from-other').classList.toggle('hidden',s.value!=='__other__');offerCalc();}
+function handleOfferTo(){const s=$('o-to');$('o-to-other').classList.toggle('hidden',s.value!=='__other__');offerCalc();}
+function handleCarOther(){const s=$('o-car');$('o-car-other').classList.toggle('hidden',!s.value.includes('Other'));}
+function handleBikeOther(){const s=$('o-bike');$('o-bike-other').classList.toggle('hidden',!s.value.includes('Other'));}
+function handleProfileCarOther(){const s=$('p-car');$('p-car-other').classList.toggle('hidden',s.value!=='__other__');}
+function handleProfileAreaOther(){const s=$('p-area');$('p-area-other').classList.toggle('hidden',s.value!=='__other__');}
+function handleAuthAreaOther(){const s=$('au-area');$('au-area-other').classList.toggle('hidden',s.value!=='__other__');}
+
+// ════════════════════════════════════════
+//  OFFER CALC
+// ════════════════════════════════════════
+
+function getOfferFrom(){const s=$('o-from');return s?.value==='__other__'?($('o-from-other')?.value?.trim()||'PECHS'):s?.value||'PECHS';}
+function getOfferTo(){const s=$('o-to');return s?.value==='__other__'?($('o-to-other')?.value?.trim()||'I.I. Chundrigar (Downtown)'):s?.value||'I.I. Chundrigar (Downtown)';}
+
+function offerCalc(){
+  const from=getOfferFrom(),to=getOfferTo();
   const isBike=currentVehicleType==='bike';
-  const mileageEl=isBike?document.getElementById('o-mileage-bike'):document.getElementById('o-mileage');
-  const mileage=parseFloat(mileageEl?.value||(isBike?35:13));
-  const seats=parseInt(document.getElementById('o-seats')?.value||2);
-  const time=document.getElementById('o-time')?.value||'08:00';
+  const mileage=parseFloat($( isBike?'o-mileage-bike':'o-mileage')?.value||(isBike?35:13));
+  const seats=parseInt($('o-seats')?.value||2);
+  const time=$('o-time')?.value||'08:00';
   const [hh,mm]=time.split(':').map(Number);
   const dist=(DIST[from]&&DIST[from][to])||12;
-  const tripCost=Math.round((dist/mileage)*PETROL);
-  const perPerson=Math.round(tripCost/(seats+1));
-  const youRecover=perPerson*seats;
-  const yourShare=tripCost-youRecover;
-  const arrMins=Math.round(dist/28*60)+8;
-  const arrH=hh+Math.floor((mm+arrMins)/60);
-  const arrM=(mm+arrMins)%60;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('cp-dist', dist+' km');
-  set('cp-total','Rs.'+tripCost);
-  set('cp-per',  'Rs.'+perPerson);
-  set('cp-recover','Rs.'+youRecover);
-  set('cp-yours','Rs.'+yourShare);
+  const trip=Math.round((dist/mileage)*PETROL);
+  const per=Math.round(trip/(seats+1));
+  const recover=per*seats;
+  const yours=trip-recover;
+  const arrM=Math.round(dist/28*60)+8;
+  const arrH=hh+Math.floor((mm+arrM)/60);
+  const arrMin=(mm+arrM)%60;
+  set('cp-dist',dist+' km'); set('cp-total','Rs.'+trip); set('cp-per','Rs.'+per);
+  set('cp-recover','Rs.'+recover); set('cp-yours','Rs.'+yours);
   set('tp-t1',`${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}`);
-  set('tp-p1', from||'Departure');
-  set('tp-t2',`${arrH}:${arrM.toString().padStart(2,'0')}`);
-  set('tp-p2', to||'Arrival');
+  set('tp-p1',from); set('tp-t2',`${arrH}:${arrMin.toString().padStart(2,'0')}`); set('tp-p2',to);
 }
 
 // ════════════════════════════════════════
 //  MY RIDES TABS
 // ════════════════════════════════════════
 
-function switchMyTab(t) {
+function switchMyTab(t){
   ['offered','joined','history'].forEach(tab=>{
-    document.getElementById('my-'+tab)?.classList.add('hidden');
-    document.getElementById('mrt-'+tab)?.classList.remove('active');
+    $('my-'+tab)?.classList.add('hidden');
+    $('mrt-'+tab)?.classList.remove('active');
   });
-  document.getElementById('my-'+t)?.classList.remove('hidden');
-  document.getElementById('mrt-'+t)?.classList.add('active');
+  $('my-'+t)?.classList.remove('hidden');
+  $('mrt-'+t)?.classList.add('active');
 }
 
 // ════════════════════════════════════════
 //  SAVINGS CALCULATOR
 // ════════════════════════════════════════
 
-function calcUpdate() {
-  const dist=+document.getElementById('c-d').value;
-  const mil =+document.getElementById('c-m').value;
-  const pass=+document.getElementById('c-p').value;
-  document.getElementById('c-dv').textContent=dist+' km';
-  document.getElementById('c-mv').textContent=mil+' km/L';
-  document.getElementById('c-pv').textContent=pass;
+function calcUpdate(){
+  const dist=+$('c-d').value, mil=+$('c-m').value, pass=+$('c-p').value;
+  $('c-dv').textContent=dist+' km'; $('c-mv').textContent=mil+' km/L'; $('c-pv').textContent=pass;
   const solo=Math.round((dist*2/mil)*PETROL*26);
-  const share=Math.round(solo/(pass+1));
-  const save=solo-share;
-  document.getElementById('c-solo').textContent='Rs.'+solo.toLocaleString();
-  document.getElementById('c-share').textContent='Rs.'+share.toLocaleString();
-  document.getElementById('c-save').textContent='Rs.'+save.toLocaleString();
-  document.getElementById('c-year').textContent='Rs.'+(save*12).toLocaleString();
+  const share=Math.round(solo/(pass+1)), save=solo-share;
+  $('c-solo').textContent='Rs.'+solo.toLocaleString(); $('c-share').textContent='Rs.'+share.toLocaleString();
+  $('c-save').textContent='Rs.'+save.toLocaleString(); $('c-year').textContent='Rs.'+(save*12).toLocaleString();
 }
 calcUpdate();
-
-// ════════════════════════════════════════
-//  RATING MODAL
-// ════════════════════════════════════════
-
-let currentRating=0;
-function openRateModal() { document.getElementById('rate-modal').classList.add('open'); }
-function closeRateModal() { document.getElementById('rate-modal').classList.remove('open'); }
-function setRating(n) {
-  currentRating=n;
-  document.querySelectorAll('.sp').forEach((s,i)=>s.classList.toggle('lit',i<n));
-}
-async function submitRating() {
-  if (!currentRating) { showToast('Please pick a star rating first.','err'); return; }
-  if (FB() && window._currentUser) {
-    // In production: save rating to Firestore and update driver's average
-    // await addDoc(collection(db,'ratings'), { rating: currentRating, ... })
-  }
-  closeRateModal();
-  showToast(`✓ ${currentRating}-star rating submitted. Thank you!`);
-  currentRating=0;
-  document.querySelectorAll('.sp').forEach(s=>s.classList.remove('lit'));
-}
 
 // ════════════════════════════════════════
 //  TOAST
 // ════════════════════════════════════════
 
-function showToast(msg, type='') {
-  const stack=document.getElementById('toast-stack');
+function showToast(msg,type=''){
+  const stack=$('toast-stack');
   const t=document.createElement('div');
-  t.className='toast'+(type?' '+type:'');
-  t.textContent=msg;
+  t.className='toast'+(type?' '+type:''); t.textContent=msg;
   stack.appendChild(t);
   requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
   setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3800);
 }
 
+
+window.updateNavForUser = updateNavForUser;
+window.loadUserProfile = loadUserProfile;
+window.subscribeToNotifications = subscribeToNotifications;
+window.subscribeToMyRides = subscribeToMyRides;
+
+// Re-export so the module script can call these
+// The module script calls: updateNavForUser, loadUserProfile, loadNotifications, loadMyRides
+// We wire them here:
+window.loadNotifications = subscribeToNotifications;
+window.loadMyRides = subscribeToMyRides;
+
 // ════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════
-renderRides(ALL_RIDES);
+
+// Rides only load when user navigates to Find Ride
+// Nothing loads on startup — clean slate
+window._loadedRides = [];
 offerCalc();
 </script>
 </body>
