@@ -375,6 +375,20 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
   .mobile-only { display: block !important; }
 }
 .mobile-only { display: none; }
+
+
+@media (max-width: 900px) {
+  .sidebar.mobile-active {
+    display: block !important;
+    position: fixed;
+    top: 62px;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background: var(--black);
+    height: calc(100vh - 62px);
+  }
+}
 </style>
 </head>
 <body>
@@ -392,14 +406,13 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
     <span class="nav-link" id="nl-rides" onclick="showSection('myrides')">My Rides</span>
     <span class="nav-link" id="nl-dash" onclick="showSection('dashboard')">Driver Hub</span>
   </div>
-  <div class="nav-right">
-    <button class="notif-btn" onclick="showPage('notifications')">
-      🔔<span class="notif-dot hidden" id="ndot"></span>
-    </button>
-    <button class="btn btn-outline btn-sm hidden" id="nav-logout" onclick="_fb.signOut(_fb.auth)">Logout</button>
-    <button class="btn btn-red btn-sm" id="nav-auth-btn" onclick="openModal('auth-modal')">Login</button>
-    <button class="btn btn-ghost mobile-only" id="menu-toggle" style="font-size:1.5rem; padding:0 0.5rem;">☰</button>
-  </div>
+ <div class="nav-right">
+  <button class="notif-btn" onclick="showPage('notifications')">
+    🔔<span class="notif-dot hidden" id="ndot"></span>
+  </button>
+  <button class="btn btn-outline btn-sm hidden" id="nav-logout" onclick="_fb.signOut(_fb.auth)">Logout</button>
+  <button class="btn btn-red btn-sm" id="nav-auth-btn" onclick="openModal('auth-modal')">Login</button>
+</div>
 </nav>
 
 <!-- LANDING PAGE -->
@@ -835,10 +848,9 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
     <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1rem"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:.72rem;color:var(--muted)">or</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
 
     <div class="modal-tabs">
-      <button class="modal-tab active" id="at-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-      <button class="modal-tab" id="at-login" onclick="switchAuthTab('login')">Log In</button>
-    </div>
-
+  <button id="at-login" class="modal-tab active" onclick="switchAuthTab('login')">Login</button>
+  <button id="at-signup" class="modal-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+</div>
     <!-- SIGN UP FORM -->
     <div id="af-signup">
       <div class="field"><label>Full Name</label><input type="text" id="su-name" placeholder="Ahmed Khan"/></div>
@@ -991,13 +1003,16 @@ const DIST = {
 function updateNavForUser(user) {
   const authBtn = $('nav-auth-btn');
   const logoutBtn = $('nav-logout');
+  const heroSignup = document.querySelector('.hero-btns .btn-red'); // Selects "Start Carpooling" or "Sign Up"
+
   if (user) {
-    authBtn.classList.add('hidden');
-    logoutBtn.classList.remove('hidden');
+    if (authBtn) authBtn.classList.add('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+    if (heroSignup) heroSignup.classList.add('hidden');
   } else {
-    authBtn.classList.remove('hidden');
-    logoutBtn.classList.add('hidden');
-    showPage('landing');
+    if (authBtn) authBtn.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    if (heroSignup) heroSignup.classList.remove('hidden');
   }
 }
 
@@ -1154,11 +1169,16 @@ async function handleSignOut() {
 function openAuthModal() { $('auth-modal').classList.add('open'); }
 function closeAuthModal() { $('auth-modal').classList.remove('open'); clearAuthErrors(); }
 function switchAuthTab(t) {
-  $('af-signup').classList.toggle('hidden', t!=='signup');
-  $('af-login').classList.toggle('hidden', t!=='login');
-  $('at-signup').classList.toggle('active', t==='signup');
-  $('at-login').classList.toggle('active', t==='login');
-  clearAuthErrors();
+  // Toggle the visibility of the login and signup form sections
+  if ($('af-signup')) $('af-signup').classList.toggle('hidden', t !== 'signup');
+  if ($('af-login')) $('af-login').classList.toggle('hidden', t !== 'login');
+  
+  // Update the visual state of the tabs
+  if ($('at-signup')) $('at-signup').classList.toggle('active', t === 'signup');
+  if ($('at-login')) $('at-login').classList.toggle('active', t === 'login');
+  
+  // Clear any previous error messages
+  if (typeof clearAuthErrors === 'function') clearAuthErrors();
 }
 
 function requireAuth(action) {
@@ -2178,6 +2198,11 @@ window.loadMyRides = subscribeToMyRides;
 // Nothing loads on startup — clean slate
 window._loadedRides = [];
 offerCalc();
+
+function toggleMobileMenu() {
+  const sb = document.querySelector('.sidebar');
+  sb.classList.toggle('mobile-active');
+}
 </script>
 </body>
 </html>
