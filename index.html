@@ -6,54 +6,6 @@
 <title>SaathChalo — ساتھ چلو · Karachi Carpooling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet"/>
-<!-- Firebase SDK v10 -->
-<script type="module" id="firebase-app-script">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         signInWithPopup, GoogleAuthProvider, sendEmailVerification,
-         sendPasswordResetEmail, signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, getDoc, doc,
-         setDoc, updateDoc, query, where, orderBy, onSnapshot,
-         serverTimestamp, increment, arrayUnion }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-
-  const firebaseConfig = {
-  apiKey: "AIzaSyD-PSOylIfxWS2iFCEKbcsLo8oH9C73UGA",
-  authDomain: "saathchalo-71843.firebaseapp.com",
-  projectId: "saathchalo-71843",
-  storageBucket: "saathchalo-71843.firebasestorage.app",
-  messagingSenderId: "1083497535808",
-  appId: "1:1083497535808:web:337411b7464d214ff982a5"
-};
-
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-
-window._fb = { auth, db, googleProvider,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signInWithPopup, sendEmailVerification, sendPasswordResetEmail,
-  signOut, onAuthStateChanged,
-  collection, addDoc, getDocs, getDoc, doc, setDoc,
-  updateDoc, query, where, orderBy, onSnapshot,
-  serverTimestamp, increment, arrayUnion };
-
-onAuthStateChanged(auth, (user) => {
-  window._currentUser = user || null;
-  updateNavForUser(user);
-  if (user) {
-    loadUserProfile(user.uid);
-    loadNotifications(user.uid);
-    loadMyRides(user.uid);
-  }
-});
-</script>
 <style>
 :root{--black:#0D0D0D;--cream:#F5F0E8;--red:#E8380D;--red-dark:#B82B09;--muted:#6B6560;--card:#1A1A1A;--border:#2A2A2A;--green:#2ECC71;--yellow:#F4C430;--blue:#3B82F6;--fd:'Archivo Black',sans-serif;--fb:'Barlow',sans-serif;--fu:'Noto Nastaliq Urdu',serif}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -61,40 +13,28 @@ body{background:var(--black);color:var(--cream);font-family:var(--fb);min-height
 .hidden{display:none!important}
 input,select,textarea{background:var(--black);border:1px solid var(--border);color:var(--cream);padding:.7rem 1rem;font-family:var(--fb);font-size:.9rem;outline:none;transition:border-color 180ms;width:100%}
 input:focus,select:focus,textarea:focus{border-color:var(--red)}
-select option{background:var(--black)}
 label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.35rem}
 .field{margin-bottom:1rem}
-.btn{border:none;cursor:pointer;font-family:var(--fb);font-size:.9rem;font-weight:600;transition:all 160ms;padding:.75rem 1.5rem}
+.btn{border:none;cursor:pointer;font-family:var(--fb);font-size:.9rem;font-weight:600;transition:all 160ms;padding:.75rem 1.5rem;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;}
 .btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red-dark)}
 .btn-outline{background:transparent;color:var(--cream);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--cream)}
 .btn-ghost{background:transparent;color:var(--muted);border:none;padding:.4rem .8rem;font-size:.78rem;cursor:pointer;transition:color 150ms;font-family:var(--fb)}.btn-ghost:hover{color:var(--cream)}
 .btn-green{background:var(--green);color:#0D0D0D}.btn-green:hover{opacity:.9}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{opacity:.9}
 .btn-sm{padding:.4rem .9rem;font-size:.78rem}
 .btn-full{width:100%}
-.tag{font-size:.62rem;padding:.2rem .5rem;background:#1F1F1F;border:1px solid var(--border);color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
-.tag-green{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08)}
-.tag-blue{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
-.badge{font-size:.62rem;padding:.25rem .6rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.badge-green{background:rgba(46,204,113,.15);color:var(--green);border:1px solid var(--green)}
-.badge-yellow{background:rgba(244,196,48,.15);color:var(--yellow);border:1px solid var(--yellow)}
-.badge-red{background:rgba(232,56,13,.15);color:var(--red);border:1px solid var(--red)}
-.badge-muted{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
 .avatar{display:flex;align-items:center;justify-content:center;font-family:var(--fd);color:#fff;flex-shrink:0}
-.stars{display:flex;gap:2px;color:var(--yellow);font-size:.85rem}
-.page{display:none}.page.active{display:block}
-.divider{height:1px;background:var(--border);margin:1.5rem 0}
+
 /* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(13,13,13,.97);backdrop-filter:blur(10px);z-index:200}
-.logo{display:flex;flex-direction:column;line-height:1;cursor:pointer}
+.logo{display:flex;flex-direction:column;line-height:1;cursor:pointer;text-decoration:none;color:var(--cream)}
 .logo-en{font-family:var(--fd);font-size:1.3rem;letter-spacing:-.5px}
 .logo-ur{font-family:var(--fu);font-size:.78rem;color:var(--red);direction:rtl}
 .nav-links{display:flex;gap:1.5rem;align-items:center}
-.nav-link{color:var(--muted);font-size:.85rem;font-weight:500;cursor:pointer;padding:.3rem 0;border-bottom:2px solid transparent;transition:all 180ms}
+.nav-link{color:var(--muted);font-size:.85rem;font-weight:500;cursor:pointer;padding:.3rem 0;border-bottom:2px solid transparent;transition:all 180ms;text-decoration:none}
 .nav-link:hover,.nav-link.active{color:var(--cream);border-color:var(--red)}
 .nav-right{display:flex;align-items:center;gap:.8rem}
-.notif-btn{position:relative;background:none;border:1px solid var(--border);color:var(--muted);padding:.4rem .7rem;cursor:pointer;font-size:.9rem;transition:all 150ms}
-.notif-btn:hover{color:var(--cream);border-color:var(--cream)}
-.notif-dot{position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--black)}
+
 /* LANDING */
 .hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 62px);border-bottom:1px solid var(--border)}
 .hero-l{padding:4rem 2.5rem;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
@@ -111,25 +51,27 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2
 .pb-val.g{color:var(--green)}
 .pb-div{width:1px;height:36px;background:var(--border)}
 .hero-btns{display:flex;gap:.8rem;flex-wrap:wrap}
+
 .hero-r{padding:3rem 2rem;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
 .hero-r::before{content:'ساتھ\Aچلو';white-space:pre;position:absolute;font-family:var(--fu);font-size:clamp(5rem,12vw,10rem);color:#181818;right:-1rem;top:50%;transform:translateY(-50%);line-height:1;direction:rtl;pointer-events:none}
 .rpc-stack{position:relative;z-index:1;display:flex;flex-direction:column;gap:.6rem}
-.rpc{background:var(--card);border:1px solid var(--border);padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;transition:border-color 200ms,transform 150ms;cursor:pointer;animation:fadeRight .4s both}
+.rpc{background:var(--card);border:1px solid var(--border);padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;transition:border-color 200ms,transform 150ms;cursor:default;animation:fadeRight .4s both}
 .rpc:nth-child(2){animation-delay:.15s}.rpc:nth-child(3){animation-delay:.3s}.rpc:nth-child(4){animation-delay:.45s}
 @keyframes fadeRight{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-.rpc:hover{border-color:var(--red);transform:translateX(-3px)}
 .rpc-av{width:38px;height:38px}
 .rpc-route{font-weight:600;font-size:.85rem}
 .rpc-meta{font-size:.72rem;color:var(--muted);margin-top:.15rem}
 .rpc-cost{font-family:var(--fd);font-size:.95rem;color:var(--green);white-space:nowrap;margin-left:auto}
+
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
 .stat{padding:1.5rem 2rem;border-right:1px solid var(--border)}
 .stat:last-child{border-right:none}
 .stat-n{font-family:var(--fd);font-size:1.9rem;line-height:1}
 .stat-n span{color:var(--red)}
 .stat-l{font-size:.68rem;color:var(--muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:1px}
+
 .hiw{padding:4rem 2.5rem;border-bottom:1px solid var(--border)}
-.section-eye{font-size:.68rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:.4rem}
+.section-eye{font-size:.68rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
 .section-h{font-family:var(--fd);font-size:clamp(2rem,4vw,3.2rem);line-height:1;letter-spacing:-1px;color:var(--cream);margin-bottom:1.5rem}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border)}
 .step{padding:2rem;border-right:1px solid var(--border);position:relative}
@@ -138,6 +80,28 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2
 .step-icon{position:absolute;top:2rem;right:2rem;font-size:1.4rem}
 .step-t{font-family:var(--fd);font-size:1rem;margin-bottom:.4rem}
 .step-d{font-size:.82rem;color:var(--muted);line-height:1.6}
+
+/* APP FEATURES SECTION */
+.features-sec{padding:4rem 2.5rem;border-bottom:1px solid var(--border);background:#0D0D0D}
+.feats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:2.5rem}
+.feat-card{background:var(--card);border:1px solid var(--border);padding:2rem;transition:transform 200ms ease, border-color 200ms ease;}
+.feat-card:hover{transform:translateY(-5px);border-color:var(--red)}
+.feat-icon{font-size:2.5rem;margin-bottom:1rem;display:inline-block;}
+.feat-h{font-family:var(--fd);font-size:1.2rem;margin-bottom:.5rem;color:var(--cream)}
+.feat-d{font-size:.9rem;color:var(--muted);line-height:1.6}
+
+/* BLOG SECTION */
+.blogs-sec{padding:4rem 2.5rem;border-bottom:1px solid var(--border);background:var(--card)}
+.blogs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:2.5rem}
+.blog-card{display:flex;flex-direction:column;border:1px solid var(--border);background:var(--black);text-decoration:none;transition:border-color 200ms ease;cursor:pointer;}
+.blog-card:hover{border-color:var(--red)}
+.blog-img{height:180px;background:#181818;display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid var(--border)}
+.blog-content{padding:1.5rem}
+.blog-date{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.blog-title{font-family:var(--fd);font-size:1.1rem;color:var(--cream);margin-bottom:.5rem;line-height:1.3}
+.blog-excerpt{font-size:.85rem;color:var(--muted);line-height:1.6}
+
+/* CALCULATOR */
 .calc-sec{padding:4rem 2.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
 .calc-box{background:var(--card);border:1px solid var(--border);padding:2rem}
 .range-wrap{margin-bottom:1.2rem}
@@ -150,208 +114,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sg-val{font-family:var(--fd);font-size:1.6rem}
 .sg-val.g{color:var(--green)}.sg-val.r{color:var(--red)}.sg-val.y{color:var(--yellow)}
 .sg-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem}
-/* APP SHELL */
-.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 62px)}
-.sidebar{border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
-.sb-section{margin-bottom:1.5rem}
-.sb-label{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:0 1.2rem;margin-bottom:.4rem}
-.sb-link{display:flex;align-items:center;gap:.7rem;padding:.65rem 1.2rem;color:var(--muted);cursor:pointer;transition:all 150ms;font-size:.88rem;font-weight:500;border-left:3px solid transparent}
-.sb-link:hover{color:var(--cream);background:rgba(255,255,255,.03)}
-.sb-link.active{color:var(--cream);background:rgba(232,56,13,.08);border-left-color:var(--red)}
-.sb-icon{font-size:1rem;width:20px;text-align:center}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;padding:.1rem .4rem;font-weight:700}
-.main{padding:2rem 2.5rem}
-.ap-section{display:none}.ap-section.active{display:block}
-.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.8rem}
-.page-title{font-family:var(--fd);font-size:1.7rem;letter-spacing:-.5px}
-.page-sub{font-size:.82rem;color:var(--muted);margin-top:.3rem}
-/* FIND */
-.search-box{background:var(--card);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem}
-.search-row{display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:end}
-.filter-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center}
-.fc{background:var(--black);border:1px solid var(--border);color:var(--muted);padding:.32rem .75rem;font-size:.75rem;cursor:pointer;transition:all 150ms;font-family:var(--fb);font-weight:500}
-.fc.on{border-color:var(--red);color:var(--red);background:rgba(232,56,13,.08)}
-.results-list{display:flex;flex-direction:column;gap:.7rem}
-.ride-card{background:var(--card);border:1px solid var(--border);padding:1.3rem;display:grid;grid-template-columns:auto 1fr auto;gap:1.2rem;align-items:center;transition:border-color 180ms,transform 120ms;cursor:pointer}
-.ride-card:hover{border-color:var(--red);transform:translateX(3px)}
-.rc-av{width:48px;height:48px;font-size:1.1rem}
-.rc-route{font-family:var(--fd);font-size:.95rem;margin-bottom:.25rem}
-.rc-meta{font-size:.75rem;color:var(--muted);margin-bottom:.4rem}
-.rc-tags{display:flex;gap:.4rem;flex-wrap:wrap}
-.rc-right{text-align:right;min-width:90px}
-.rc-cost{font-family:var(--fd);font-size:1.35rem;color:var(--green)}
-.rc-cost-lbl{font-size:.65rem;color:var(--muted)}
-.rc-seats{font-size:.72rem;color:var(--muted);margin:.2rem 0}
-.no-results{padding:3rem;text-align:center;color:var(--muted);font-size:.9rem;border:1px dashed var(--border)}
-/* DETAIL */
-.back-btn{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.82rem;cursor:pointer;margin-bottom:1.5rem;transition:color 150ms;background:none;border:none;padding:0}
-.back-btn:hover{color:var(--cream)}
-.detail-grid{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
-.detail-card{background:var(--card);border:1px solid var(--border);padding:1.5rem;margin-bottom:1rem}
-.detail-card h3{font-family:var(--fd);font-size:.95rem;margin-bottom:1rem;color:var(--cream)}
-.route-line{padding-left:1.8rem;position:relative}
-.route-line::before{content:'';position:absolute;left:.45rem;top:.4rem;bottom:.4rem;width:2px;background:var(--border)}
-.rdot{position:relative;margin-bottom:1.5rem}
-.rdot:last-child{margin-bottom:0}
-.rdot::before{content:'';position:absolute;left:-1.38rem;top:.35rem;width:10px;height:10px;border:2px solid var(--red);background:var(--black)}
-.rdot:first-child::before{background:var(--red)}
-.rdot-place{font-weight:600;font-size:.9rem}
-.rdot-time{font-size:.75rem;color:var(--muted);margin-top:.1rem}
-.map-ph{background:#0a0a0a;height:170px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;position:relative;overflow:hidden;border:1px solid var(--border);margin-top:.8rem}
-.map-ph::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(255,255,255,.018) 28px,rgba(255,255,255,.018) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(255,255,255,.018) 28px,rgba(255,255,255,.018) 29px)}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:.9rem}
-.stat-mini{background:var(--black);border:1px solid var(--border);padding:.8rem;text-align:center}
-.stat-mini-val{font-family:var(--fd);font-size:1.1rem}
-.stat-mini-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:.2rem}
-.driver-profile-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
-.dp-av{width:56px;height:56px;font-size:1.3rem}
-.dp-name{font-family:var(--fd);font-size:1.1rem}
-.dp-meta{font-size:.78rem;color:var(--muted);margin-top:.2rem}
-.dp-rating{display:flex;align-items:center;gap:.4rem;margin-top:.25rem;font-size:.78rem;color:var(--muted)}
-.seat-slots{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.slot{width:34px;height:34px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted)}
-.slot.taken{border-color:var(--red);color:var(--red);background:rgba(232,56,13,.08)}
-.slot.free{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08)}
-.cost-breakdown{background:var(--card);border:1px solid var(--border);padding:1.3rem;margin-bottom:1rem}
-.cb-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem}
-.cb-row:last-child{border-bottom:none;padding-top:.8rem}
-.cb-row.total .cv{font-family:var(--fd);font-size:1.2rem;color:var(--green)}
-.cl{color:var(--muted)}.cv{font-weight:600}
-.rules-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
-.rules-list li{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:.5rem}
-.rules-list li::before{content:'→';color:var(--red);font-size:.7rem}
-/* OFFER */
-.offer-layout{display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start}
-.offer-card{background:var(--card);border:1px solid var(--border);padding:2rem}
-.fg2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.fg2 .full{grid-column:1/-1}
-.waypoint-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.wp-icon{width:24px;text-align:center;font-size:.9rem;flex-shrink:0;color:var(--muted)}
-.waypoint-row>div{flex:1}
-.prefs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-top:.5rem}
-.pref-tog{display:flex;align-items:center;gap:.5rem;padding:.6rem;border:1px solid var(--border);cursor:pointer;transition:all 150ms;font-size:.78rem;color:var(--muted)}
-.pref-tog.on{border-color:var(--red);color:var(--cream);background:rgba(232,56,13,.08)}
-.cost-prev-card{background:var(--card);border:1px solid var(--border);padding:1.3rem;position:sticky;top:78px}
-.cp-title{font-family:var(--fd);font-size:.9rem;margin-bottom:.9rem}
-.cp-row{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--border);font-size:.82rem}
-.cp-row:last-of-type{border-bottom:none}
-.cp-row .v{font-family:var(--fd)}.cp-row .v.g{color:var(--green)}.cp-row .v.r{color:var(--red)}
-.tl-prev{background:var(--black);border:1px solid var(--border);padding:.8rem;margin-top:.8rem}
-.tp-row{display:flex;gap:.7rem;align-items:flex-start;font-size:.8rem;margin-bottom:.6rem}
-.tp-row:last-child{margin-bottom:0}
-.tp-time{color:var(--red);font-family:var(--fd);font-size:.82rem;min-width:46px}
-.tp-place{color:var(--cream)}
-.tp-sub{color:var(--muted);font-size:.7rem;margin-top:.1rem}
-/* MY RIDES */
-.mr-tabs{display:flex;border:1px solid var(--border);width:fit-content;margin-bottom:1.5rem}
-.mr-tab{padding:.55rem 1.2rem;background:transparent;color:var(--muted);border:none;border-right:1px solid var(--border);font-family:var(--fb);font-size:.82rem;font-weight:600;cursor:pointer;transition:all 150ms}
-.mr-tab:last-child{border-right:none}.mr-tab.active{background:var(--red);color:#fff}
-.mrc{background:var(--card);border:1px solid var(--border);padding:1.3rem;margin-bottom:.7rem}
-.mrc:hover{border-color:rgba(232,56,13,.3)}
-.mrc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem}
-.mrc-route{font-family:var(--fd);font-size:.95rem}
-.mrc-meta{font-size:.75rem;color:var(--muted);margin-top:.25rem}
-.mrc-body{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:end}
-.pchips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.pchip{display:flex;align-items:center;gap:.35rem;background:var(--black);border:1px solid var(--border);padding:.28rem .6rem;font-size:.72rem}
-.pchip-dot{width:7px;height:7px;border-radius:50%}
-.earn-val{font-family:var(--fd);font-size:1.2rem;color:var(--green)}
-.earn-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
-.mrc-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border)}
-/* DRIVER DASH */
-.dd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
-.dd-stat{background:var(--card);border:1px solid var(--border);padding:1.2rem}
-.dd-val{font-family:var(--fd);font-size:1.8rem;line-height:1}
-.dd-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.3rem}
-.req-card{background:var(--card);border:1px solid var(--border);padding:1.1rem;display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;margin-bottom:.6rem;transition:border-color 180ms}
-.req-card:hover{border-color:rgba(232,56,13,.3)}
-.req-name{font-weight:600;font-size:.9rem}
-.req-meta{font-size:.72rem;color:var(--muted);margin-top:.15rem}
-.req-area{font-size:.78rem;color:var(--cream);margin-top:.3rem;display:flex;align-items:center;gap:.3rem}
-.req-actions{display:flex;gap:.4rem}
-/* ACTIVE RIDE */
-.arb{background:rgba(46,204,113,.1);border:1px solid var(--green);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
-.arb-left{display:flex;align-items:center;gap:.7rem}
-.arb-dot{width:10px;height:10px;background:var(--green);border-radius:50%;animation:blink 1s infinite}
-.arb-title{font-family:var(--fd);font-size:.95rem}
-.arb-sub{font-size:.75rem;color:var(--muted);margin-top:.1rem}
-.active-grid{display:grid;grid-template-columns:1fr 260px;gap:1rem;align-items:start}
-.tracker-card{background:var(--card);border:1px solid var(--border);padding:1.3rem}
-.track-map{background:#0F1A0F;border:1px solid rgba(46,204,113,.2);height:170px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.4rem;position:relative;overflow:hidden;margin-bottom:1rem}
-.track-map::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 25px,rgba(46,204,113,.04) 25px,rgba(46,204,113,.04) 26px),repeating-linear-gradient(90deg,transparent,transparent 25px,rgba(46,204,113,.04) 25px,rgba(46,204,113,.04) 26px)}
-.car-ani{font-size:2.2rem;position:relative;z-index:1;animation:carMove 3s ease-in-out infinite}
-@keyframes carMove{0%,100%{transform:translateX(-6px)}50%{transform:translateX(6px)}}
-.ts-row{display:flex;align-items:center;gap:.8rem;padding:.6rem;background:var(--black);border:1px solid var(--border);margin-bottom:.4rem}
-.ts-row.done{border-color:var(--green);opacity:.65}
-.ts-row.current{border-color:var(--red)}
-.ts-check{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
-.ts-check.done{color:var(--green)}.ts-check.cur{color:var(--red)}.ts-check.pend{color:var(--muted)}
-.ts-place{font-size:.85rem;font-weight:600;flex:1}.ts-time{font-size:.75rem;color:var(--muted)}
-/* NOTIFICATIONS */
-.notif-list{display:flex;flex-direction:column;gap:.5rem}
-.ni{background:var(--card);border:1px solid var(--border);padding:1rem 1.2rem;display:grid;grid-template-columns:auto 1fr auto;gap:.9rem;align-items:start}
-.ni.unread{border-left:3px solid var(--red)}
-.ni-icon{width:34px;height:34px;background:var(--black);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
-.ni-title{font-size:.88rem;font-weight:600;margin-bottom:.2rem}
-.ni-body{font-size:.78rem;color:var(--muted);line-height:1.5}
-.ni-time{font-size:.68rem;color:var(--muted);white-space:nowrap}
-/* PROFILE */
-.profile-layout{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start}
-.profile-card{background:var(--card);border:1px solid var(--border);padding:2rem;text-align:center}
-.profile-av{width:80px;height:80px;font-size:2rem;margin:0 auto 1rem}
-.profile-name{font-family:var(--fd);font-size:1.3rem;margin-bottom:.2rem}
-.profile-role{font-size:.75rem;color:var(--muted);margin-bottom:.7rem}
-.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:1rem 0;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.ps-val{font-family:var(--fd);font-size:1.3rem}
-.ps-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:.15rem}
-.profile-form{background:var(--card);border:1px solid var(--border);padding:2rem}
-.pf-section{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.pf-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.pf-title{font-family:var(--fd);font-size:.95rem;margin-bottom:1rem}
-.review-item{background:var(--black);border:1px solid var(--border);padding:.9rem;margin-bottom:.5rem}
-.review-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
-/* MODALS */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 220ms}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--card);border:1px solid var(--border);padding:2.5rem;width:min(440px,92vw);position:relative;transform:translateY(20px);transition:transform 250ms cubic-bezier(.25,.46,.45,.94)}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;transition:color 150ms}
-.modal-close:hover{color:var(--cream)}
-.modal-title{font-family:var(--fd);font-size:1.7rem;letter-spacing:-.5px;margin-bottom:.25rem}
-.modal-sub{font-size:.82rem;color:var(--muted);margin-bottom:1.5rem}
-.modal-tabs{display:flex;border:1px solid var(--border);margin-bottom:1.3rem}
-.modal-tab{flex:1;padding:.55rem;background:transparent;color:var(--muted);border:none;border-right:1px solid var(--border);font-family:var(--fb);font-size:.82rem;font-weight:600;cursor:pointer;transition:all 150ms}
-.modal-tab:last-child{border-right:none}.modal-tab.active{background:var(--red);color:#fff}
-.role-sel{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
-.role-opt{border:1px solid var(--border);padding:.8rem;cursor:pointer;text-align:center;transition:all 150ms}
-.role-opt.on{border-color:var(--red);background:rgba(232,56,13,.08)}
-.role-icon{font-size:1.3rem;margin-bottom:.25rem}
-.role-lbl{font-size:.78rem;font-weight:600}
-.rate-modal{background:var(--card);border:1px solid var(--border);padding:2.5rem;width:min(440px,92vw);transform:translateY(20px);transition:transform 250ms cubic-bezier(.25,.46,.45,.94)}
-.modal-overlay.open .rate-modal{transform:translateY(0)}
-.star-picker{display:flex;gap:.5rem;font-size:2rem;cursor:pointer;margin:1rem 0}
-.sp{color:var(--border);transition:color 120ms}.sp.lit{color:var(--yellow)}
-.rate-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:1rem}
-.rate-chip{background:var(--black);border:1px solid var(--border);color:var(--muted);padding:.3rem;font-size:.72rem;cursor:pointer;text-align:center;transition:all 150ms;font-family:var(--fb)}
-.rate-chip.on{border-color:var(--red);color:var(--cream)}
-/* TOAST */
-.toast-stack{position:fixed;bottom:1.5rem;right:1.5rem;display:flex;flex-direction:column;gap:.5rem;z-index:400}
-.toast{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--green);padding:.65rem 1.2rem;font-size:.82rem;font-weight:600;min-width:250px;transform:translateX(120%);transition:transform 300ms cubic-bezier(.25,.46,.45,.94)}
-.toast.show{transform:translateX(0)}
-.toast.err{border-left-color:var(--red)}
-.toast.info{border-left-color:var(--blue)}
+
+/* PROMO BANNER */
+.promo-banner{background:url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="2px" height="2px" fill="rgba(232,56,13,0.1)"/></svg>');background-color:#140806;padding:4rem 2.5rem;text-align:center;border-bottom:1px solid var(--border)}
+.promo-h{font-family:var(--fd);font-size:clamp(2rem,4vw,3.2rem);line-height:1;letter-spacing:-1px;color:var(--cream);margin-bottom:1rem}
+.promo-sub{color:var(--muted);font-size:1rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+
 /* FOOTER */
-footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.footer-l{font-size:.8rem;color:var(--muted)}
-.footer-r{font-size:.72rem;color:var(--muted);border:1px solid var(--border);padding:.2rem .7rem}
-/* Mobile nav */
+footer{background:var(--black);padding:4rem 2.5rem 2rem;border-top:1px solid var(--border)}
+.footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-bottom:3rem}
+.footer-col-title{font-family:var(--fd);font-size:1rem;color:var(--cream);margin-bottom:1.2rem}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:.85rem;transition:color 150ms}
+.footer-links a:hover{color:var(--cream)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid var(--border)}
+.footer-copy{font-size:.8rem;color:var(--muted)}
+.footer-badges{font-size:.72rem;color:var(--muted);border:1px solid var(--border);padding:.2rem .7rem}
+
+/* Mobile Nav Overlay */
 .mobile-menu-btn{display:none;background:none;border:1px solid var(--border);color:var(--cream);padding:.4rem .7rem;cursor:pointer;font-size:1rem}
 .mobile-nav{display:none;position:fixed;inset:0;background:rgba(13,13,13,.98);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
 .mobile-nav.open{display:flex}
-.mobile-nav-link{font-family:var(--fd);font-size:2rem;letter-spacing:-1px;color:var(--muted);cursor:pointer;transition:color 200ms;text-align:center}
+.mobile-nav-link{font-family:var(--fd);font-size:2rem;letter-spacing:-1px;color:var(--muted);cursor:pointer;transition:color 200ms;text-align:center;text-decoration:none}
 .mobile-nav-link:hover{color:var(--cream)}
 .mobile-nav-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer}
-.mobile-nav-sub{font-size:.8rem;color:var(--muted);margin-top:-.8rem}
+
 @media(max-width:900px){
   .hero{grid-template-columns:1fr}.hero-r{display:none}
   .stats-bar{grid-template-columns:repeat(2,1fr)}
@@ -359,1858 +146,268 @@ footer{padding:1.5rem 2.5rem;border-top:1px solid var(--border);display:flex;jus
   .steps{grid-template-columns:1fr}
   .step{border-right:none;border-bottom:1px solid var(--border)}
   .calc-sec{grid-template-columns:1fr}
-  .app-layout{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .search-row{grid-template-columns:1fr}
-  .detail-grid,.offer-layout,.profile-layout{grid-template-columns:1fr}
-  .dd-grid{grid-template-columns:1fr 1fr}
-  .active-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:repeat(2,1fr)}
   .nav-links{display:none}
   .mobile-menu-btn{display:block}
-  .nav-links,.nav-right .btn-outline:first-of-type{display:none}
+  .nav-right{display:none}
+  .footer-bottom{flex-direction:column;gap:1rem;text-align:center}
 }
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:500px){
+  .footer-grid{grid-template-columns:1fr}
+  .savings-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <div class="logo" onclick="goHome()">
+  <a href="#" class="logo">
     <span class="logo-en">SaathChalo</span>
     <span class="logo-ur">ساتھ چلو</span>
-  </div>
+  </a>
   <div class="nav-links">
-    <span class="nav-link active" id="nl-home" onclick="goHome()">Home</span>
-    <span class="nav-link" id="nl-find" onclick="showSection('find')">Find Ride</span>
-    <span class="nav-link" id="nl-offer" onclick="showSection('offer')">Offer Ride</span>
-    <span class="nav-link" id="nl-rides" onclick="showSection('myrides')">My Rides</span>
-    <span class="nav-link" id="nl-dash" onclick="showSection('dashboard')">Driver Hub</span>
+    <a href="#how-it-works" class="nav-link">How it Works</a>
+    <a href="#calculator" class="nav-link">Calculator</a>
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#blogs" class="nav-link">Blogs</a>
   </div>
   <div class="nav-right">
-    <a href="https://github.com/Farhanharoon116/Saathchalo/releases/download/v1.0.0/saathchalo.apk" target="_blank" class="btn btn-green btn-sm" style="text-decoration:none;">📱 App</a>
-    <button class="notif-btn" onclick="showSection('notifications')">🔔<span class="notif-dot" id="ndot"></span></button>
-    <button class="btn btn-outline btn-sm" onclick="showSection('profile')">👤 Profile</button>
-    <button class="btn btn-outline btn-sm hidden" id="signout-btn" onclick="handleSignOut()" style="color:var(--muted)">Sign Out</button>
-    <button class="btn btn-red btn-sm" id="auth-btn" onclick="openAuthModal()">Sign In</button>
+    <a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank" class="btn btn-green btn-sm">
+      📱 Download Android App
+    </a>
   </div>
-  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
-  </nav>
-
-  <!-- MOBILE NAV OVERLAY -->
-  <div class="mobile-nav" id="mobile-nav">
-    <button class="mobile-nav-close" onclick="toggleMobileMenu()">✕</button>
-    <div class="mobile-nav-link" onclick="goHome();toggleMobileMenu()">Home</div>
-    <div class="mobile-nav-link" onclick="showSection('find');toggleMobileMenu()">Find a Ride</div>
-    <div class="mobile-nav-sub">Browse live rides in Karachi</div>
-    <div class="mobile-nav-link" onclick="showSection('offer');toggleMobileMenu()">Offer a Ride</div>
-    <div class="mobile-nav-sub">Post your daily route</div>
-    <div class="mobile-nav-link" onclick="showSection('myrides');toggleMobileMenu()">My Rides</div>
-    <div class="mobile-nav-link" onclick="showSection('notifications');toggleMobileMenu()">Notifications <span id="mobile-notif-badge" style="font-size:1rem;color:var(--red)"></span></div>
-    <div class="mobile-nav-link" onclick="showSection('profile');toggleMobileMenu()">Profile</div>
-    <div id="mobile-signout" class="hidden" style="margin-top:.5rem">
-      <div class="mobile-nav-link" onclick="handleSignOut();toggleMobileMenu()" style="color:var(--red);font-size:1.3rem">Sign Out</div>
-    </div>
-    <div id="mobile-signin" style="margin-top:.5rem">
-      <div class="mobile-nav-link" onclick="openAuthModal();toggleMobileMenu()" style="color:var(--red);font-size:1.3rem">Sign In</div>
-    </div>
-    <div style="margin-top:1.5rem">
-      <a href="https://github.com/Farhanharoon116/Saathchalo/releases/download/v1.0.0/saathchalo.apk" target="_blank" class="btn btn-green" style="text-decoration:none;font-size:1.2rem;padding:0.8rem 2rem;display:inline-block;">📱 Download APK</a>
-    </div>
-  </div>
+  <button class="mobile-menu-btn" onclick="document.getElementById('mobile-nav').classList.add('open')">☰</button>
 </nav>
 
-<!-- LANDING PAGE -->
-<div id="page-landing" class="page active">
-  <section class="hero">
-    <div class="hero-l">
-      <div class="live-tag"><div class="live-dot"></div>Karachi · Fuel Crisis Live</div>
-      <h1 class="hero-h">Split<br>the<br><span class="acc">Cost.</span><br>Not the<br>Road.</h1>
-      <p class="hero-sub">Petrol is at Rs.378/litre after the Middle East crisis. SaathChalo connects Karachiites going the same way — office workers, university students, daily commuters.</p>
-      <div class="price-bar">
-        <div class="pb-item"><div class="pb-label">Petrol Today</div><div class="pb-val">Rs.378</div></div>
-        <div class="pb-div"></div>
-        <div class="pb-item"><div class="pb-label">Split 2 Ways</div><div class="pb-val g">Rs.189</div></div>
-        <div class="pb-div"></div>
-        <div class="pb-item"><div class="pb-label">Split 4 Ways</div><div class="pb-val g">Rs.95</div></div>
-      </div>
-      <div class="hero-btns">
-        <button class="btn btn-red" onclick="showSection('find')">Find a Ride →</button>
-        <button class="btn btn-outline" onclick="showSection('offer')">Offer My Car</button>
-        <a href="https://github.com/Farhanharoon116/Saathchalo/releases/download/v1.0.0/saathchalo.apk" target="_blank" class="btn btn-green" style="text-decoration:none;display:inline-flex;align-items:center;">📱 Download APK</a>
-        <button class="btn-ghost" onclick="document.getElementById('calc-sec').scrollIntoView({behavior:'smooth'})">↓ See Your Savings</button>
-      </div>
-    </div>
-    <div class="hero-r">
-      <div class="rpc-stack">
-        <div class="rpc" onclick="showSection('find')"><div class="avatar rpc-av" style="background:#E8380D">A</div><div><div class="rpc-route">PECHS → I.I. Chundrigar</div><div class="rpc-meta">8:00 AM · Honda City · 2 seats</div></div><div class="rpc-cost">Rs.95</div></div>
-        <div class="rpc" onclick="showSection('find')"><div class="avatar rpc-av" style="background:#2ECC71;color:#0D0D0D">S</div><div><div class="rpc-route">Gulshan → IBA Karachi</div><div class="rpc-meta">7:45 AM · Suzuki Swift · 1 seat</div></div><div class="rpc-cost">Rs.110</div></div>
-        <div class="rpc" onclick="showSection('find')"><div class="avatar rpc-av" style="background:#3B82F6">B</div><div><div class="rpc-route">Defence → Shaheed-e-Millat</div><div class="rpc-meta">8:30 AM · Toyota Corolla · 3 seats</div></div><div class="rpc-cost">Rs.130</div></div>
-        <div class="rpc" onclick="showSection('find')"><div class="avatar rpc-av" style="background:#F4C430;color:#0D0D0D">Z</div><div><div class="rpc-route">North Nazimabad → NED</div><div class="rpc-meta">8:15 AM · Honda Civic · 3 seats</div></div><div class="rpc-cost">Rs.70</div></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="stats-bar">
-    <div class="stat"><div class="stat-n">Rs.<span>378</span></div><div class="stat-l">Petrol per litre right now</div></div>
-    <div class="stat"><div class="stat-n"><span>75%</span></div><div class="stat-l">Max savings (4-person carpool)</div></div>
-    <div class="stat"><div class="stat-n"><span>47</span></div><div class="stat-l">Active rides in Karachi today</div></div>
-    <div class="stat"><div class="stat-n">Rs.<span>0</span></div><div class="stat-l">Platform fee — always free</div></div>
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.getElementById('mobile-nav').classList.remove('open')">✕</button>
+  <a href="#how-it-works" class="mobile-nav-link" onclick="document.getElementById('mobile-nav').classList.remove('open')">How It Works</a>
+  <a href="#calculator" class="mobile-nav-link" onclick="document.getElementById('mobile-nav').classList.remove('open')">Calculator</a>
+  <a href="#features" class="mobile-nav-link" onclick="document.getElementById('mobile-nav').classList.remove('open')">Features</a>
+  <a href="#blogs" class="mobile-nav-link" onclick="document.getElementById('mobile-nav').classList.remove('open')">Blogs</a>
+  <div style="margin-top:1.5rem">
+    <a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank" class="btn btn-green">
+      📱 Download Android App
+    </a>
   </div>
+</div>
 
-  <section class="hiw">
-    <div class="section-eye">How It Works</div>
-    <h2 class="section-h">Three steps. Half the bill.</h2>
-    <div class="steps">
-      <div class="step"><div class="step-n">01</div><div class="step-icon">📍</div><div class="step-t">Set Your Route</div><div class="step-d">Enter your pickup area and destination. We cover all major Karachi zones — PECHS, DHA, Gulshan, Clifton, North Nazimabad, Korangi and more.</div></div>
-      <div class="step"><div class="step-n">02</div><div class="step-icon">🤝</div><div class="step-t">Match & Connect</div><div class="step-d">See verified drivers going your exact route. Check timing, car, cost share, and driver rating. Full ride details before you request to join.</div></div>
-      <div class="step"><div class="step-n">03</div><div class="step-icon">⛽</div><div class="step-t">Split & Ride</div><div class="step-d">Cost split fairly by distance and passenger count at today's petrol rate. Coordinate on WhatsApp. Pay your share directly — no app wallet needed.</div></div>
+<!-- LANDING PAGE HERO -->
+<section class="hero">
+<div class="hero-l">
+    <div class="live-tag"><div class="live-dot"></div>Karachi · Android App Live</div>
+    <h1 class="hero-h">Split<br>the<br><span class="acc">Cost.</span><br>Not the<br>Road.</h1>
+    <p class="hero-sub">SaathChalo is Karachi's trusted carpooling platform connecting people going the same way. Now fully featured in our new Android App.</p>
+    <div class="price-bar">
+    <div class="pb-item"><div class="pb-label">Petrol Today</div><div class="pb-val">Rs.378</div></div>
+    <div class="pb-div"></div>
+    <div class="pb-item"><div class="pb-label">Split 2 Ways</div><div class="pb-val g">Rs.189</div></div>
+    <div class="pb-div"></div>
+    <div class="pb-item"><div class="pb-label">Split 4 Ways</div><div class="pb-val g">Rs.95</div></div>
     </div>
-  </section>
+    <div class="hero-btns">
+    <a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank" class="btn btn-red">Get it on Google Play</a>
+    <a href="#calculator" class="btn btn-outline">See Your Savings ↓</a>
+    </div>
+</div>
+<div class="hero-r">
+    <div class="rpc-stack">
+    <div class="rpc"><div class="avatar rpc-av" style="background:#E8380D">A</div><div><div class="rpc-route">PECHS → I.I. Chundrigar</div><div class="rpc-meta">8:00 AM · Honda City · 2 seats</div></div><div class="rpc-cost">Rs.95</div></div>
+    <div class="rpc"><div class="avatar rpc-av" style="background:#2ECC71;color:#0D0D0D">S</div><div><div class="rpc-route">Gulshan → IBA Karachi</div><div class="rpc-meta">7:45 AM · Suzuki Swift · 1 seat</div></div><div class="rpc-cost">Rs.110</div></div>
+    <div class="rpc"><div class="avatar rpc-av" style="background:#3B82F6">B</div><div><div class="rpc-route">Defence → Shaheed-e-Millat</div><div class="rpc-meta">8:30 AM · Toyota Corolla · 3 seats</div></div><div class="rpc-cost">Rs.130</div></div>
+    <div class="rpc"><div class="avatar rpc-av" style="background:#F4C430;color:#0D0D0D">Z</div><div><div class="rpc-route">North Nazimabad → NED</div><div class="rpc-meta">8:15 AM · Honda Civic · 3 seats</div></div><div class="rpc-cost">Rs.70</div></div>
+    </div>
+</div>
+</section>
 
-  <section class="calc-sec" id="calc-sec">
+<!-- STATS BAR -->
+<div class="stats-bar">
+<div class="stat"><div class="stat-n">Rs.<span>378</span></div><div class="stat-l">Petrol per litre right now</div></div>
+<div class="stat"><div class="stat-n"><span>75%</span></div><div class="stat-l">Max savings (4-person carpool)</div></div>
+<div class="stat"><div class="stat-n"><span>12k+</span></div><div class="stat-l">Downloads in Karachi</div></div>
+<div class="stat"><div class="stat-n">Rs.<span>0</span></div><div class="stat-l">Platform fee — always free</div></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="hiw">
+<div class="section-eye"><div class="live-dot" style="animation:none;background:var(--red)"></div> How It Works</div>
+<h2 class="section-h">Three steps. Half the bill.</h2>
+<div class="steps">
+    <div class="step"><div class="step-n">01</div><div class="step-icon">📍</div><div class="step-t">Set Your Route</div><div class="step-d">Enter your pickup area and destination. We cover all major Karachi zones — PECHS, DHA, Gulshan, Clifton, North Nazimabad, Korangi and more.</div></div>
+    <div class="step"><div class="step-n">02</div><div class="step-icon">🤝</div><div class="step-t">Match & Connect</div><div class="step-d">See verified drivers going your exact route. Check timing, car, cost share, and driver rating. Request to join and connect instantly.</div></div>
+    <div class="step"><div class="step-n">03</div><div class="step-icon">⛽</div><div class="step-t">Split & Ride</div><div class="step-d">Cost split fairly by distance and passenger count at today's petrol rate. Coordinate on WhatsApp and pay directly in cash or EasyPaisa.</div></div>
+</div>
+</section>
+
+<!-- APP FEATURES -->
+<section id="features" class="features-sec">
+<div class="section-eye"><div class="live-dot" style="animation:none;background:var(--red)"></div> Exclusively on the App</div>
+<h2 class="section-h">Built native for Karachi commutes.</h2>
+<div class="feats-grid">
+    <div class="feat-card">
+    <div class="feat-icon">📱</div>
+    <h3 class="feat-h">Live Ride Tracking</h3>
+    <p class="feat-d">Watch your driver's real-time location. Never guess where your carpool is, avoiding the blazing heat on the streets.</p>
+    </div>
+    <div class="feat-card">
+    <div class="feat-icon">✓</div>
+    <h3 class="feat-h">Verified Profiles & Reviews</h3>
+    <p class="feat-d">Every user builds reputation with post-ride ratings. Safety first: check reviews and preferences before hopping in.</p>
+    </div>
+    <div class="feat-card">
+    <div class="feat-icon">💬</div>
+    <h3 class="feat-h">In-App Chat & WhatsApp Sync</h3>
+    <p class="feat-d">Fast, seamless coordination. Message in the app or tap to instantly switch to WhatsApp with pre-filled context.</p>
+    </div>
+    <div class="feat-card">
+    <div class="feat-icon">🔔</div>
+    <h3 class="feat-h">Route Alerts & Push Notifs</h3>
+    <p class="feat-d">Turn on notifications for your daily route. Get instantly alerted the second someone posts a matching ride.</p>
+    </div>
+</div>
+</section>
+
+<!-- CALCULATOR -->
+<section id="calculator" class="calc-sec">
+<div>
+    <div class="section-eye"><div class="live-dot" style="animation:none;background:var(--red)"></div> Fuel Cost Calculator</div>
+    <h2 class="section-h">See exactly<br>how much<br>you save.</h2>
+    <p style="color:var(--muted);font-size:.88rem;line-height:1.7;max-width:360px">At Rs.378/litre, even a 10km daily commute eats thousands a month. Move the sliders to see your real numbers.</p>
+</div>
+<div class="calc-box">
+    <div class="range-wrap"><div class="range-lbl"><span>Daily one-way distance</span><span class="range-val" id="c-dv">15 km</span></div><input type="range" id="c-d" min="2" max="45" value="15" oninput="calcUpdate()"/></div>
+    <div class="range-wrap"><div class="range-lbl"><span>Car mileage</span><span class="range-val" id="c-mv">13 km/L</span></div><input type="range" id="c-m" min="7" max="22" value="13" oninput="calcUpdate()"/></div>
+    <div class="range-wrap"><div class="range-lbl"><span>Carpool passengers</span><span class="range-val" id="c-pv">2</span></div><input type="range" id="c-p" min="1" max="3" value="2" oninput="calcUpdate()"/></div>
+    <div class="savings-grid">
+    <div><div class="sg-val r" id="c-solo">—</div><div class="sg-lbl">Solo monthly</div></div>
+    <div><div class="sg-val g" id="c-share">—</div><div class="sg-lbl">Your share</div></div>
+    <div><div class="sg-val g" id="c-save">—</div><div class="sg-lbl">Monthly savings</div></div>
+    <div><div class="sg-val y" id="c-year">—</div><div class="sg-lbl">Yearly savings</div></div>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank" class="btn btn-red btn-full" style="margin-top:1rem;height:fit-content">Start Saving on the App →</a>
+</div>
+</section>
+
+<!-- BLOGS SECTION -->
+<section id="blogs" class="blogs-sec">
+<div class="section-eye"><div class="live-dot" style="animation:none;background:var(--red)"></div> Perspectives</div>
+<h2 class="section-h">The Latest from SaathChalo</h2>
+<div class="blogs-grid">
+    <a href="blog-fuel-crisis.html" class="blog-card">
+    <div class="blog-img">📈</div>
+    <div class="blog-content">
+        <div class="blog-date">April 7, 2026 · 3 min read</div>
+        <div class="blog-title">The Fuel Crisis of 2026: How Karachi Can Adapt</div>
+        <div class="blog-excerpt">With petrol prices soaring to an all-time high, the middle-class commute is broken. Here's why shared mobility is the only sustainable answer.</div>
+    </div>
+    </a>
+    <a href="blog-safety-first.html" class="blog-card">
+    <div class="blog-img">🛡️</div>
+    <div class="blog-content">
+        <div class="blog-date">March 28, 2026 · 4 min read</div>
+        <div class="blog-title">Safety First: Navigating Trust in Carpools</div>
+        <div class="blog-excerpt">Unveiling our community-first approach to safety. How reviews, verifications, and WhatsApp integrations create a safe space for everyone.</div>
+    </div>
+    </a>
+    <a href="blog-carpool-etiquette.html" class="blog-card">
+    <div class="blog-img">💡</div>
+    <div class="blog-content">
+        <div class="blog-date">March 15, 2026 · 2 min read</div>
+        <div class="blog-title">Carpool Etiquette 101: A Guide for Beginners</div>
+        <div class="blog-excerpt">New to SaathChalo? Read over these golden rules for passengers and drivers to ensure a smooth, music-filled, and respectful ride.</div>
+    </div>
+    </a>
+</div>
+</section>
+
+<!-- PROMO OUTRO -->
+<section class="promo-banner">
+    <h2 class="promo-h">Ready to hit the road?</h2>
+    <p class="promo-sub">Join thousands of Karachiites sharing rides, saving money, and reducing traffic on the streets every single day.</p>
+    <a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank" class="btn btn-green" style="font-size:1.1rem;padding:1rem 2rem;">📱 Download app on Google Play</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="footer-grid">
     <div>
-      <div class="section-eye">Fuel Cost Calculator</div>
-      <h2 class="section-h">See exactly<br>how much<br>you save.</h2>
-      <p style="color:var(--muted);font-size:.88rem;line-height:1.7;max-width:360px">At Rs.378/litre, even a 10km daily commute eats thousands a month. Move the sliders to see your real numbers.</p>
+    <div class="logo">
+        <span class="logo-en" style="font-size:1.5rem">SaathChalo</span>
+        <span class="logo-ur" style="font-size:.9rem">ساتھ چلو</span>
     </div>
-    <div class="calc-box">
-      <div class="range-wrap"><div class="range-lbl"><span>Daily one-way distance</span><span class="range-val" id="c-dv">15 km</span></div><input type="range" id="c-d" min="2" max="45" value="15" oninput="calcUpdate()"/></div>
-      <div class="range-wrap"><div class="range-lbl"><span>Car mileage</span><span class="range-val" id="c-mv">13 km/L</span></div><input type="range" id="c-m" min="7" max="22" value="13" oninput="calcUpdate()"/></div>
-      <div class="range-wrap"><div class="range-lbl"><span>Carpool passengers</span><span class="range-val" id="c-pv">2</span></div><input type="range" id="c-p" min="1" max="3" value="2" oninput="calcUpdate()"/></div>
-      <div class="savings-grid">
-        <div><div class="sg-val r" id="c-solo">—</div><div class="sg-lbl">Solo monthly</div></div>
-        <div><div class="sg-val g" id="c-share">—</div><div class="sg-lbl">Your share</div></div>
-        <div><div class="sg-val g" id="c-save">—</div><div class="sg-lbl">Monthly savings</div></div>
-        <div><div class="sg-val y" id="c-year">—</div><div class="sg-lbl">Yearly savings</div></div>
-      </div>
-      <button class="btn btn-red btn-full" style="margin-top:1rem" onclick="showSection('find')">Find This Ride Now →</button>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:1rem;line-height:1.6;padding-right:1rem">
+        Connecting Karachiites going the same way during the fuel crisis. Split costs, not the road.
+    </p>
     </div>
-  </section>
-
-  <footer>
-    <div class="footer-l"><strong style="color:var(--cream)">SaathChalo</strong> — ساتھ چلو · Built for Karachi · Free always.</div>
-    <div class="footer-r">Built in response to Pakistan's fuel crisis · April 2026</div>
-  </footer>
+    <div>
+    <h4 class="footer-col-title">App Highlights</h4>
+    <ul class="footer-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#calculator">Fuel Cost Calculator</a></li>
+        <li><a href="https://play.google.com/store/apps/details?id=com.best.saathchalo" target="_blank">Download Android App</a></li>
+    </ul>
+    </div>
+    <div>
+    <h4 class="footer-col-title">Resources</h4>
+    <ul class="footer-links">
+        <li><a href="#blogs">Blog & Updates</a></li>
+        <li><a href="#">Help Center / FAQ</a></li>
+        <li><a href="#">Contact Support</a></li>
+        <li><a href="#">Community Guidelines</a></li>
+    </ul>
+    </div>
+    <div>
+    <h4 class="footer-col-title">Legal</h4>
+    <ul class="footer-links">
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Driver Policy</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+    </ul>
+    </div>
 </div>
-
-<!-- APP PAGE -->
-<div id="page-app" class="page">
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sb-section">
-        <div class="sb-label">Rides</div>
-        <div class="sb-link" id="sl-find" onclick="showSection('find')"><span class="sb-icon">🔍</span>Find a Ride</div>
-        <div class="sb-link" id="sl-offer" onclick="showSection('offer')"><span class="sb-icon">🚗</span>Offer a Ride</div>
-        <div class="sb-link" id="sl-myrides" onclick="showSection('myrides')"><span class="sb-icon">📋</span>My Rides</div>
-        <div class="sb-link" id="sl-active" onclick="showSection('active')"><span class="sb-icon">🟢</span>Active Ride<span class="sb-badge">LIVE</span></div>
-      </div>
-      <div class="sb-section">
-        <div class="sb-label">Driver</div>
-        <div class="sb-link" id="sl-dashboard" onclick="showSection('dashboard')"><span class="sb-icon">📊</span>Driver Dashboard</div>
-      </div>
-      <div class="sb-section">
-        <div class="sb-label">Account</div>
-        <div class="sb-link" id="sl-notifications" onclick="showSection('notifications')"><span class="sb-icon">🔔</span>Notifications<span class="sb-badge" id="nb-badge">3</span></div>
-        <div class="sb-link" id="sl-profile" onclick="showSection('profile')"><span class="sb-icon">👤</span>My Profile</div>
-      </div>
-    </aside>
-
-    <main class="main">
-
-      <!-- FIND RIDE -->
-      <div id="ap-find" class="ap-section">
-        <div class="page-hdr">
-          <div><div class="page-title">Find a Ride</div><div class="page-sub">Karachi · <span style="color:var(--green)">●</span> 47 active rides today</div></div>
-        </div>
-        <div class="search-box">
-          <div class="search-row">
-            <div class="field" style="margin:0"><label>From (Area)</label>
-              <select id="f-from" onchange="handleFromChange()">
-                <option value="">All areas</option>
-                <option>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option>
-                <option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option>
-                <option>Nazimabad</option><option>Malir</option><option>Korangi</option><option>Orangi Town</option>
-                <option>Liaquatabad</option><option>Landhi</option><option>Site Area</option>
-                <option value="__other__">Other (type below)</option>
-              </select>
-              <input type="text" id="f-from-other" class="hidden" placeholder="Type your area..." oninput="filterRides()" style="margin-top:.4rem"/>
-            </div>
-            <div class="field" style="margin:0"><label>To (Destination)</label>
-              <select id="f-to" onchange="handleToChange()">
-                <option value="">All destinations</option>
-                <option>I.I. Chundrigar (Downtown)</option><option>Shaheed-e-Millat Road</option>
-                <option>NUCES FAST</option><option>IBA Karachi</option><option>NED University</option>
-                <option>Karachi University</option><option>Korangi Industrial</option><option>Saddar</option>
-                <option>Port Qasim</option><option>Clifton</option><option>Tariq Road</option>
-                <option value="__other__">Other (type below)</option>
-              </select>
-              <input type="text" id="f-to-other" class="hidden" placeholder="Type destination..." oninput="filterRides()" style="margin-top:.4rem"/>
-            </div>
-            <button class="btn btn-red" style="height:fit-content" onclick="filterRides()">Search →</button>
-          </div>
-          <div class="filter-row">
-            <span style="font-size:.7rem;color:var(--muted)">Filter:</span>
-            <div class="fc" onclick="toggleFilter(this,'ac')">❄️ AC</div>
-            <div class="fc" onclick="toggleFilter(this,'female')">🚺 Female Driver</div>
-            <div class="fc" onclick="toggleFilter(this,'daily')">📅 Daily Route</div>
-            <div class="fc" onclick="toggleFilter(this,'students')">🎓 Students</div>
-            <div class="fc" onclick="toggleFilter(this,'verified')">✓ Verified Only</div>
-            <div class="fc" onclick="toggleFilter(this,'morning')">🌅 Before 9 AM</div>
-            <div class="fc" onclick="toggleFilter(this,'bike')">🏍️ Bike Only</div>
-            <div class="fc" onclick="toggleFilter(this,'car')">🚗 Car Only</div>
-            <div class="fc" onclick="toggleFilter(this,'pillion')">1 Pillion Only</div>
-          </div>
-        </div>
-        <div class="results-list" id="results-list"></div>
-      </div>
-
-      <!-- RIDE DETAIL -->
-      <div id="ap-detail" class="ap-section">
-        <button class="back-btn" onclick="backToFind()">← Back to results</button>
-        <div id="detail-content"></div>
-      </div>
-
-      <!-- OFFER RIDE -->
-      <div id="ap-offer" class="ap-section">
-        <div class="page-hdr">
-          <div><div class="page-title">Offer a Ride</div><div class="page-sub">Post your route and recover your fuel cost</div></div>
-        </div>
-        <div class="offer-layout">
-          <div class="offer-card">
-            <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1.2rem">📍 Route Details</div>
-            <div class="waypoint-row"><span class="wp-icon">🟢</span><div style="flex:1"><label>Starting Point</label><select id="o-from" onchange="handleOfferFrom()"><option>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option><option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option><option>Nazimabad</option><option>Malir</option><option>Korangi</option><option>Orangi Town</option><option>Liaquatabad</option><option>Landhi</option><option>Site Area</option><option value="__other__">Other (type below)</option></select><input type="text" id="o-from-other" class="hidden" placeholder="Type your area..." oninput="offerCalc()" style="margin-top:.4rem"/></div></div>
-            <div id="extra-wp" class="hidden waypoint-row"><span class="wp-icon">🔵</span><div style="flex:1"><label>Pickup Stop (optional)</label><input type="text" placeholder="e.g. Tariq Road"/></div><button class="btn-ghost" onclick="document.getElementById('extra-wp').classList.add('hidden')">✕</button></div>
-            <div class="waypoint-row"><span class="wp-icon">🔴</span><div style="flex:1"><label>Destination</label><select id="o-to" onchange="handleOfferTo()"><option>I.I. Chundrigar (Downtown)</option><option>Shaheed-e-Millat Road</option><option>NUCES FAST</option><option>IBA Karachi</option><option>NED University</option><option>Karachi University</option><option>Korangi Industrial</option><option>Saddar</option><option>Port Qasim</option><option>Clifton</option><option>Tariq Road</option><option value="__other__">Other (type below)</option></select><input type="text" id="o-to-other" class="hidden" placeholder="Type destination..." oninput="offerCalc()" style="margin-top:.4rem"/></div></div>
-            <button class="btn-ghost" style="margin-bottom:1rem" onclick="document.getElementById('extra-wp').classList.remove('hidden')">+ Add pickup stop</button>
-            <div class="divider"></div>
-            <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">🕐 Timing & Seats</div>
-            <div class="fg2">
-              <div class="field"><label>Departure Time</label><input type="time" id="o-time" value="08:00" onchange="offerCalc()"/></div>
-              <div class="field"><label>Return Trip?</label><select id="o-return"><option>One-way only</option><option>Yes, same route back</option></select></div>
-              <div class="field"><label>Available Seats</label><select id="o-seats" onchange="offerCalc()"><option value="1">1 seat</option><option value="2" selected>2 seats</option><option value="3">3 seats</option></select></div>
-              <div class="field"><label>Repeat Schedule</label><select><option>Mon–Fri (Daily)</option><option>Mon, Wed, Fri</option><option>Tue, Thu</option><option>Weekends only</option><option>One-time only</option></select></div>
-            </div>
-            <div class="divider"></div>
-            <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem" id="vehicle-section-title">🚗 Vehicle Details</div>
-            <div style="display:flex;gap:.5rem;margin-bottom:1rem">
-              <div class="fc on" id="vtype-car" onclick="setVehicleType('car')">🚗 Car</div>
-              <div class="fc" id="vtype-bike" onclick="setVehicleType('bike')">🏍️ Motorbike</div>
-            </div>
-            <div class="fg2" id="car-fields">
-              <div class="field"><label>Car Make & Model</label><select id="o-car" onchange="handleCarOther()"><option>Honda City</option><option>Toyota Corolla</option><option>Suzuki Alto</option><option>Suzuki Swift</option><option>Honda Civic</option><option>Suzuki Cultus</option><option>Toyota Yaris</option><option>KIA Picanto</option><option>Other (type below)</option></select><input type="text" id="o-car-other" class="hidden" placeholder="Type car model..." style="margin-top:.4rem"/></div>
-              <div class="field"><label>Mileage (km/litre)</label><input type="number" id="o-mileage" value="13" min="6" max="25" onchange="offerCalc()"/></div>
-              <div class="field full"><label>Number Plate (for verification)</label><input type="text" id="o-plate" placeholder="e.g. KHI-4521"/></div>
-            </div>
-            <div class="fg2 hidden" id="bike-fields">
-              <div class="field"><label>Bike Make & Model</label><select id="o-bike" onchange="handleBikeOther()"><option>Honda CD 70</option><option>Honda CG 125</option><option>Honda CB 150F</option><option>Yamaha YBR 125</option><option>Suzuki GS 150</option><option>Road Prince 70cc</option><option>United 70cc</option><option>Ravi 70cc</option><option>Other (type below)</option></select><input type="text" id="o-bike-other" class="hidden" placeholder="Type bike model..." style="margin-top:.4rem"/></div>
-              <div class="field"><label>Mileage (km/litre)</label><input type="number" id="o-mileage-bike" value="35" min="20" max="60" onchange="offerCalc()"/></div>
-              <div class="field full"><label>Number Plate (for verification)</label><input type="text" id="o-plate-bike" placeholder="e.g. KHI-4521"/></div>
-            </div>
-            <div class="divider"></div>
-            <div style="font-family:var(--fd);font-size:1rem;margin-bottom:.8rem">⚙️ Ride Preferences</div>
-            <div class="prefs-grid">
-              <div class="pref-tog car-only" onclick="this.classList.toggle('on')">❄️ AC Available</div>
-              <div class="pref-tog" onclick="this.classList.toggle('on')">🎵 Music / Earphones OK</div>
-              <div class="pref-tog" onclick="this.classList.toggle('on')">🚺 Female Passengers Only</div>
-              <div class="pref-tog" onclick="this.classList.toggle('on')">🎓 Students Preferred</div>
-              <div class="pref-tog" onclick="this.classList.toggle('on')">🚭 No Smoking</div>
-              <div class="pref-tog" onclick="this.classList.toggle('on')">💼 Office Commuters</div>
-              <div class="pref-tog bike-only hidden" onclick="this.classList.toggle('on')">⛑️ Helmet Provided</div>
-              <div class="pref-tog bike-only hidden" onclick="this.classList.toggle('on')">🧥 Jacket Available</div>
-            </div>
-            <div class="divider"></div>
-            <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">👤 Your Details</div>
-            <div class="fg2">
-              <div class="field"><label>Your Name (shown to passengers)</label><input type="text" id="o-name" placeholder="e.g. Ahmed K."/></div>
-              <div class="field"><label>WhatsApp Number</label><input type="tel" id="o-wa" placeholder="03XX-XXXXXXX"/></div>
-            </div>
-            <button class="btn btn-red btn-full" onclick="submitOffer()">Post My Ride →</button>
-          </div>
-          <div class="cost-prev-card">
-            <div class="cp-title">📊 Live Cost Preview</div>
-            <div class="cp-row"><span style="color:var(--muted)">Route distance</span><span class="v" id="cp-dist">— km</span></div>
-            <div class="cp-row"><span style="color:var(--muted)">Your full trip cost</span><span class="v r" id="cp-total">—</span></div>
-            <div class="cp-row"><span style="color:var(--muted)">Per passenger share</span><span class="v g" id="cp-per">—</span></div>
-            <div class="cp-row"><span style="color:var(--muted)">You recover</span><span class="v g" id="cp-recover">—</span></div>
-            <div class="cp-row"><span style="color:var(--muted)">Your net cost</span><span class="v" id="cp-yours">—</span></div>
-            <div class="divider"></div>
-            <div class="cp-title">🕐 Trip Timeline</div>
-            <div class="tl-prev">
-              <div class="tp-row"><div class="tp-time" id="tp-t1">08:00</div><div><div class="tp-place" id="tp-p1">Departure</div><div class="tp-sub">Pickup from your area</div></div></div>
-              <div class="tp-row"><div class="tp-time" id="tp-t2">—</div><div><div class="tp-place" id="tp-p2">Arrival</div><div class="tp-sub">Est. based on distance</div></div></div>
-            </div>
-            <div class="divider"></div>
-            <div style="font-size:.75rem;color:var(--muted);line-height:1.6">Passengers pay you directly — cash or EasyPaisa. SaathChalo never handles money.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MY RIDES -->
-      <div id="ap-myrides" class="ap-section">
-        <div class="page-hdr"><div><div class="page-title">My Rides</div><div class="page-sub" id="myrides-sub">Loading…</div></div>
-          <button class="btn btn-red btn-sm" onclick="showSection('offer')">+ Offer New Ride</button>
-        </div>
-        <div class="mr-tabs">
-          <button class="mr-tab active" id="mrt-offered" onclick="switchMyTab('offered')">Offered <span id="mrt-offered-count"></span></button>
-          <button class="mr-tab" id="mrt-joined" onclick="switchMyTab('joined')">Joined <span id="mrt-joined-count"></span></button>
-          <button class="mr-tab" id="mrt-history" onclick="switchMyTab('history')">History</button>
-        </div>
-        <div id="my-offered"><div class="no-results">Loading your offered rides…</div></div>
-        <div id="my-joined" class="hidden"><div class="no-results">Loading your joined rides…</div></div>
-        <div id="my-history" class="hidden"><div class="no-results">Loading ride history…</div></div>
-      </div>
-
-      <!-- ACTIVE RIDE -->
-      <div id="ap-active" class="ap-section">
-        <div class="page-hdr"><div><div class="page-title">Active Ride</div><div class="page-sub">Currently in progress</div></div></div>
-        <div class="arb">
-          <div class="arb-left"><div class="arb-dot"></div><div><div class="arb-title">PECHS → I.I. Chundrigar</div><div class="arb-sub">Started 8:04 AM · ETA 8:42 AM · 38 min remaining</div></div></div>
-          <button class="btn btn-outline btn-sm" onclick="openRateModal()">Complete Ride →</button>
-        </div>
-        <div class="active-grid">
-          <div class="tracker-card">
-            <div class="track-map"><div class="car-ani">🚗</div><div style="font-size:.75rem;color:rgba(46,204,113,.6);position:relative;z-index:1">PECHS → Shahra-e-Faisal → I.I. Chundrigar</div></div>
-            <div>
-              <div class="ts-row done"><span class="ts-check done">✓</span><span class="ts-place">PECHS (Pickup)</span><span class="ts-time">8:00 AM</span></div>
-              <div class="ts-row done"><span class="ts-check done">✓</span><span class="ts-place">Sara M. picked up · Tariq Road</span><span class="ts-time">8:12 AM</span></div>
-              <div class="ts-row done"><span class="ts-check done">✓</span><span class="ts-place">Bilal A. picked up · Nursery</span><span class="ts-time">8:18 AM</span></div>
-              <div class="ts-row current"><span class="ts-check cur">→</span><span class="ts-place">Shahra-e-Faisal (en route)</span><span class="ts-time">Now</span></div>
-              <div class="ts-row"><span class="ts-check pend">○</span><span class="ts-place">I.I. Chundrigar (Destination)</span><span class="ts-time">~8:42 AM</span></div>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:1rem">
-            <div class="detail-card" style="margin:0">
-              <h3>Passengers</h3>
-              <div style="display:flex;flex-direction:column;gap:.5rem">
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem;background:var(--black);border:1px solid var(--border)"><div style="display:flex;align-items:center;gap:.6rem"><div class="avatar" style="width:28px;height:28px;font-size:.7rem;background:var(--red)">S</div>Sara M.</div><span class="badge badge-green" style="font-size:.6rem">On Board</span></div>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem;background:var(--black);border:1px solid var(--border)"><div style="display:flex;align-items:center;gap:.6rem"><div class="avatar" style="width:28px;height:28px;font-size:.7rem;background:var(--blue)">B</div>Bilal A.</div><span class="badge badge-green" style="font-size:.6rem">On Board</span></div>
-              </div>
-            </div>
-            <div class="detail-card" style="margin:0">
-              <h3>Trip Summary</h3>
-              <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.82rem">
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Distance</span><span>~7 km</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Fuel used</span><span>~0.54 L</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Total cost</span><span style="color:var(--red)">Rs.204</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Collecting from passengers</span><span style="color:var(--green)">Rs.136</span></div>
-                <div style="display:flex;justify-content:space-between;padding-top:.4rem;border-top:1px solid var(--border);font-weight:700"><span>Your net cost</span><span style="color:var(--green)">Rs.68</span></div>
-              </div>
-            </div>
-            <button class="btn btn-red btn-full" onclick="openRateModal()">Complete & Rate Passengers →</button>
-            <button class="btn-ghost btn-full" style="font-size:.78rem;border:1px solid var(--border);padding:.6rem" onclick="showToast('Emergency contact notified!','err')">🆘 Emergency</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- DRIVER DASHBOARD -->
-      <div id="ap-dashboard" class="ap-section">
-        <div class="page-hdr">
-          <div><div class="page-title">Driver Dashboard</div><div class="page-sub">Manage your rides and incoming requests</div></div>
-          <button class="btn btn-red btn-sm" onclick="showSection('offer')">+ Post New Ride</button>
-        </div>
-        <div class="dd-grid">
-          <div class="dd-stat"><div class="dd-val" id="dd-fuel" style="color:var(--green)">—</div><div class="dd-lbl">Fuel recovered (est.)</div></div>
-          <div class="dd-stat"><div class="dd-val" id="dd-rides">0</div><div class="dd-lbl">Rides offered</div></div>
-          <div class="dd-stat"><div class="dd-val" id="dd-rating" style="color:var(--yellow)">—</div><div class="dd-lbl">Your rating</div></div>
-          <div class="dd-stat"><div class="dd-val" id="dd-pending" style="color:var(--red)">0</div><div class="dd-lbl">Pending requests</div></div>
-        </div>
-        <div class="divider"></div>
-        <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">Incoming Passenger Requests</div>
-        <div id="dashboard-requests">
-          <div class="no-results">No pending requests. Post a ride to receive passenger requests.</div>
-        </div>
-        <div class="divider"></div>
-        <div style="font-family:var(--fd);font-size:1rem;margin-bottom:1rem">Your Active Routes</div>
-        <div id="dashboard-routes">
-          <div class="no-results">No active routes. <button class="btn-ghost" onclick="showSection('offer')">Post your first ride →</button></div>
-        </div>
-      </div>
-
-      <!-- NOTIFICATIONS -->
-      <div id="ap-notifications" class="ap-section">
-        <div class="page-hdr">
-          <div><div class="page-title">Notifications</div><div class="page-sub" id="notif-sub">3 unread</div></div>
-          <button class="btn btn-outline btn-sm" onclick="markAllRead()">Mark all read</button>
-        </div>
-        <div class="notif-list" id="notif-list">
-          <div class="no-results">Loading notifications…</div>
-        </div>
-      </div>
-
-      <!-- PROFILE -->
-      <div id="ap-profile" class="ap-section">
-        <div class="page-hdr">
-          <div><div class="page-title">My Profile</div></div>
-          <button class="btn btn-red btn-sm" onclick="saveProfile()">Save Changes</button>
-        </div>
-        <div class="profile-layout">
-          <div>
-            <div class="profile-card">
-              <div class="avatar profile-av" id="profile-av-init" style="background:var(--red);width:80px;height:80px;font-size:2rem;margin:0 auto 1rem">?</div>
-              <div class="profile-name" id="profile-display-name" style="font-family:var(--fd);font-size:1.3rem;margin-bottom:.2rem">—</div>
-              <div class="profile-role" id="profile-display-role" style="font-size:.75rem;color:var(--muted);margin-bottom:.7rem">Karachi</div>
-              <div class="stars" style="justify-content:center;font-size:1.1rem;margin:.3rem 0" id="profile-stars">☆☆☆☆☆</div>
-              <div style="font-size:.75rem;color:var(--muted)" id="profile-rating-line">No rides yet</div>
-              <div class="profile-stats">
-                <div><div class="ps-val" id="ps-driven">0</div><div class="ps-lbl">Driven</div></div>
-                <div><div class="ps-val" id="ps-joined">0</div><div class="ps-lbl">Joined</div></div>
-                <div><div class="ps-val" id="ps-saved" style="color:var(--green)">Rs.0</div><div class="ps-lbl">Saved</div></div>
-              </div>
-              <div class="divider"></div>
-              <div id="profile-vehicle-card" style="background:var(--black);border:1px solid var(--border);padding:.9rem;display:flex;align-items:center;gap:.8rem">
-                <div style="font-size:1.8rem">🚗</div>
-                <div style="font-size:.82rem;color:var(--muted)">No vehicle added yet.<br>Fill in Vehicle Details and save.</div>
-              </div>
-            </div>
-          </div>
-          <div class="profile-form">
-            <div class="pf-section">
-              <div class="pf-title">Personal Information</div>
-              <div class="fg2">
-                <div class="field"><label>Full Name</label><input type="text" id="p-name" placeholder="Your full name"/></div>
-                <div class="field"><label>Phone / WhatsApp</label><input type="tel" id="p-phone" placeholder="03XX-XXXXXXX"/></div>
-                <div class="field"><label>Email</label><input type="email" id="p-email" placeholder="your@email.com" readonly style="opacity:.6"/></div>
-                <div class="field"><label>Gender</label><select id="p-gender"><option value="">Select…</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
-                <div class="field full"><label>Home Area</label>
-                  <select id="p-area" onchange="handleProfileAreaOther()">
-                    <option value="">Select area…</option>
-                    <option>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option>
-                    <option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option>
-                    <option>Nazimabad</option><option>Malir</option><option>Korangi</option>
-                    <option>Orangi Town</option><option>Liaquatabad</option><option>Landhi</option>
-                    <option value="__other__">Other (type below)</option>
-                  </select>
-                  <input type="text" id="p-area-other" class="hidden" placeholder="Type your area..." style="margin-top:.4rem"/>
-                </div>
-              </div>
-            </div>
-            <div class="pf-section">
-              <div class="pf-title">Vehicle Details <span style="font-size:.72rem;color:var(--muted);font-family:var(--fb);font-weight:400">(leave blank if you don't drive)</span></div>
-              <div class="fg2">
-                <div class="field">
-                  <label>Make & Model</label>
-                  <select id="p-car" onchange="handleProfileCarOther()">
-                    <option value="">None / Not applicable</option>
-                    <option>Honda City</option><option>Toyota Corolla</option><option>Suzuki Alto</option>
-                    <option>Suzuki Swift</option><option>Honda Civic</option><option>Suzuki Cultus</option>
-                    <option>Toyota Yaris</option><option>KIA Picanto</option>
-                    <option>Honda CD 70</option><option>Honda CG 125</option><option>Honda CB 150F</option>
-                    <option>Yamaha YBR 125</option><option>Suzuki GS 150</option>
-                    <option value="__other__">Other (type below)</option>
-                  </select>
-                  <input type="text" id="p-car-other" class="hidden" placeholder="Type vehicle model..." style="margin-top:.4rem"/>
-                </div>
-                <div class="field"><label>Year</label><input type="number" id="p-car-year" placeholder="2020" min="2000" max="2026"/></div>
-                <div class="field"><label>Number Plate</label><input type="text" id="p-plate" placeholder="KHI-XXXX"/></div>
-                <div class="field"><label>Mileage (km/L)</label><input type="number" id="p-mileage" placeholder="13"/></div>
-                <div class="field"><label>Color</label><input type="text" id="p-color" placeholder="White"/></div>
-                <div class="field"><label>AC Available?</label><select id="p-ac"><option value="">—</option><option>Yes</option><option>No</option></select></div>
-              </div>
-            </div>
-            <div class="pf-section">
-              <div class="pf-title">Ride Preferences</div>
-              <div class="prefs-grid" id="profile-prefs">
-                <div class="pref-tog" id="pp-nosmoking" onclick="this.classList.toggle('on')">🚭 No Smoking</div>
-                <div class="pref-tog" id="pp-music" onclick="this.classList.toggle('on')">🎵 Music OK</div>
-                <div class="pref-tog" id="pp-students" onclick="this.classList.toggle('on')">🎓 Students Preferred</div>
-                <div class="pref-tog" id="pp-office" onclick="this.classList.toggle('on')">💼 Office Commuters</div>
-                <div class="pref-tog" id="pp-female" onclick="this.classList.toggle('on')">🚺 Female Only</div>
-                <div class="pref-tog" id="pp-helmet" onclick="this.classList.toggle('on')">⛑️ Helmet Provided</div>
-              </div>
-            </div>
-            <div class="pf-section">
-              <div class="pf-title">Reviews Received</div>
-              <div id="profile-reviews">
-                <div style="font-size:.82rem;color:var(--muted);padding:1rem;background:var(--black);border:1px solid var(--border)">No reviews yet. Complete rides to receive ratings.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
-  </div>
+<div class="footer-bottom">
+    <div class="footer-copy">© 2026 SaathChalo Pakistan. Designed in Karachi.</div>
+    <div class="footer-badges">Version 1.2 · April 2026</div>
 </div>
-
-<!-- EMAIL VERIFICATION BANNER -->
-<div id="verify-banner" class="hidden" style="background:rgba(244,196,48,.12);border-bottom:1px solid var(--yellow);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;font-size:.82rem;">
-  <span>⚠️ Please verify your email to post rides and send requests. <strong id="verify-email-txt"></strong></span>
-  <button class="btn btn-sm" style="background:var(--yellow);color:#0D0D0D;border:none;cursor:pointer" onclick="resendVerification()">Resend Email</button>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="closeAuthModal()">✕</button>
-    <div class="modal-title">Join SaathChalo</div>
-    <div class="modal-sub">Free account · 30 seconds to set up.</div>
-
-    <!-- Google Sign-In -->
-    <button id="google-btn" onclick="signInWithGoogle()" style="width:100%;background:#fff;color:#1a1a1a;border:1px solid #ddd;padding:.75rem;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:1rem;transition:box-shadow 150ms">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
-    <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1rem"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:.72rem;color:var(--muted)">or</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
-
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="at-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-      <button class="modal-tab" id="at-login" onclick="switchAuthTab('login')">Log In</button>
-    </div>
-
-    <!-- SIGN UP FORM -->
-    <div id="af-signup">
-      <div class="field"><label>Full Name</label><input type="text" id="su-name" placeholder="Ahmed Khan"/></div>
-      <div class="field"><label>Email Address</label><input type="email" id="su-email" placeholder="ahmed@gmail.com"/></div>
-      <div class="field"><label>Phone (WhatsApp)</label><input type="tel" id="su-phone" placeholder="03XX-XXXXXXX"/></div>
-      <div class="field"><label>Home Area</label>
-        <select id="au-area" onchange="handleAuthAreaOther()">
-          <option>PECHS</option><option>Defence (DHA)</option><option>Gulshan-e-Iqbal</option>
-          <option>Clifton</option><option>North Nazimabad</option><option>Gulistan-e-Jauhar</option>
-          <option>Nazimabad</option><option>Malir</option><option>Korangi</option>
-          <option>Orangi Town</option><option value="__other__">Other (type below)</option>
-        </select>
-        <input type="text" id="au-area-other" class="hidden" placeholder="Type your area..." style="margin-top:.4rem"/>
-      </div>
-      <div style="margin-bottom:1rem">
-        <label>I want to</label>
-        <div class="role-sel" id="su-roles">
-          <div class="role-opt on" onclick="this.classList.toggle('on')"><div class="role-icon">🔍</div><div class="role-lbl">Find Rides</div></div>
-          <div class="role-opt" onclick="this.classList.toggle('on')"><div class="role-icon">🚗</div><div class="role-lbl">Offer My Car</div></div>
-          <div class="role-opt" onclick="this.classList.toggle('on')"><div class="role-icon">🏍️</div><div class="role-lbl">Offer My Bike</div></div>
-        </div>
-      </div>
-      <div class="field"><label>Password</label><input type="password" id="su-pass" placeholder="Min. 6 characters"/></div>
-      <div id="auth-error" class="hidden" style="background:rgba(232,56,13,.1);border:1px solid var(--red);color:var(--red);padding:.6rem .9rem;font-size:.78rem;margin-bottom:.8rem;line-height:1.5"></div>
-      <button class="btn btn-red btn-full" id="su-btn" onclick="handleSignUp()">Create Account — Free →</button>
-      <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.5">A verification email will be sent. You must verify before posting rides.</div>
-    </div>
-
-    <!-- LOGIN FORM -->
-    <div id="af-login" class="hidden">
-      <div class="field"><label>Email Address</label><input type="email" id="li-email" placeholder="ahmed@gmail.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="li-pass" placeholder="Your password"/></div>
-      <div id="login-error" class="hidden" style="background:rgba(232,56,13,.1);border:1px solid var(--red);color:var(--red);padding:.6rem .9rem;font-size:.78rem;margin-bottom:.8rem;line-height:1.5"></div>
-      <button class="btn btn-red btn-full" id="li-btn" onclick="handleLogin()">Log In →</button>
-      <div style="text-align:center;margin-top:.8rem">
-        <button class="btn-ghost" onclick="handleForgotPassword()">Forgot password? Reset via email →</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- RATE MODAL -->
-<div class="modal-overlay" id="rate-modal" onclick="if(event.target===this)closeRateModal()">
-  <div class="rate-modal">
-    <div class="modal-title">Rate Your Ride</div>
-    <div class="modal-sub">PECHS → I.I. Chundrigar · Apr 4, 2026</div>
-    <div style="display:flex;align-items:center;gap:1rem;margin:1rem 0;padding:1rem;background:var(--black);border:1px solid var(--border)">
-      <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--red)">A</div>
-      <div><div style="font-weight:600">Ahmed K.</div><div style="font-size:.75rem;color:var(--muted)">Driver · Honda City · KHI-4521</div></div>
-    </div>
-    <label>Overall Rating</label>
-    <div class="star-picker" id="star-picker">
-      <span class="sp" onclick="setRating(1)">★</span><span class="sp" onclick="setRating(2)">★</span><span class="sp" onclick="setRating(3)">★</span><span class="sp" onclick="setRating(4)">★</span><span class="sp" onclick="setRating(5)">★</span>
-    </div>
-    <div class="field"><label>Comment (optional)</label><textarea rows="3" placeholder="How was the ride? Safe driver? On time?"></textarea></div>
-    <div class="rate-chips">
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Punctual</div>
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Safe Driver</div>
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Comfortable</div>
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Friendly</div>
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Clean Car</div>
-      <div class="rate-chip" onclick="this.classList.toggle('on')">Great Music</div>
-    </div>
-    <div style="display:flex;gap:.6rem">
-      <button class="btn btn-red btn-full" onclick="submitRating()">Submit Rating →</button>
-      <button class="btn-ghost" onclick="closeRateModal()" style="white-space:nowrap;padding:.75rem">Skip</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast-stack" id="toast-stack"></div>
+</footer>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  SAATHCHALO — Production JS
-//  All data is real — fetched from / written to Firestore
-//  No hardcoded user data anywhere
-// ═══════════════════════════════════════════════════════════
+// Calculator Logic Only
+const PETROL = 378; // Fuel context
 
-const PETROL = 378;
-let currentVehicleType = 'car';
-let activeFilters = new Set();
-window._currentUser = null;
-let _ridesUnsubscribe = null;  // real-time listener cleanup
+function calcUpdate() {
+    const $ = id => document.getElementById(id);
+    const set = (id, v) => { const el=$(id); if(el) el.textContent = v; };
 
-const FB = () => window._fb;
+    const d = parseInt($('c-d')?.value || 15);
+    const m = parseFloat($('c-m')?.value || 13);
+    const p = parseInt($('c-p')?.value || 2) + 1; // +1 includes driver
 
-// ════════════════════════════════════════
-//  HELPERS
-// ════════════════════════════════════════
+    set('c-dv', d + ' km');
+    set('c-mv', m + ' km/L');
+    set('c-pv', (p-1).toString() + (p-1>1?' people':' person'));
 
-const $ = id => document.getElementById(id);
-const set = (id, v) => { const el=$(id); if(el) el.textContent = v; };
-const setVal = (id, v) => { const el=$(id); if(el && v !== undefined && v !== null) el.value = v; };
+    // Monthly is approx 22 working days x 2 (round-trip)
+    const tripsPerMonth = 44;
+    const lPerTrip = d / m;
+    const costPerTrip = lPerTrip * PETROL;
+    const monthlySolo = Math.round(costPerTrip * tripsPerMonth);
+    const costPerPerson = Math.round(costPerTrip / p);
+    const shareMonthly = Math.round(costPerPerson * tripsPerMonth);
+    const monthlySav = monthlySolo - shareMonthly;
 
-function timeAgo(ts) {
-  if (!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  const sec = Math.floor((Date.now() - d) / 1000);
-  if (sec < 60) return 'Just now';
-  if (sec < 3600) return Math.floor(sec/60) + ' min ago';
-  if (sec < 86400) return Math.floor(sec/3600) + ' hr ago';
-  if (sec < 604800) return Math.floor(sec/86400) + ' day' + (Math.floor(sec/86400)>1?'s':'') + ' ago';
-  return d.toLocaleDateString('en-PK', {day:'numeric',month:'short'});
+    set('c-solo', 'Rs.' + monthlySolo.toLocaleString());
+    set('c-share', 'Rs.' + shareMonthly.toLocaleString());
+    set('c-save', 'Rs.' + monthlySav.toLocaleString());
+    set('c-year', 'Rs.' + (monthlySav*12).toLocaleString());
 }
 
-function starsHTML(r) {
-  const f = Math.floor(r||0);
-  return '★'.repeat(f) + '☆'.repeat(5-f);
-}
-
-function formatWANumber(phone) {
-  let n = (phone||'').replace(/[\s\-\(\)]/g,'');
-  if (n.startsWith('0')) n = '92' + n.slice(1);
-  if (n.startsWith('+')) n = n.slice(1);
-  return n;
-}
-
-function empty(containerId, msg) {
-  const el = $(containerId);
-  if (el) el.innerHTML = `<div class="no-results">${msg}</div>`;
-}
-
-function loading(containerId) {
-  const el = $(containerId);
-  if (el) el.innerHTML = `<div class="no-results" style="color:var(--muted)">⏳ Loading…</div>`;
-}
-
-// ════════════════════════════════════════
-//  DISTANCE TABLE
-// ════════════════════════════════════════
-
-const DIST = {
-  'PECHS':{'I.I. Chundrigar (Downtown)':7,'Shaheed-e-Millat Road':5,'NUCES FAST':18,'IBA Karachi':12,'NED University':14,'Korangi Industrial':20,'Saddar':9,'Karachi University':16,'Port Qasim':30,'Clifton':8,'Tariq Road':3},
-  'Defence (DHA)':{'I.I. Chundrigar (Downtown)':18,'Shaheed-e-Millat Road':15,'NUCES FAST':12,'IBA Karachi':20,'NED University':22,'Korangi Industrial':25,'Saddar':16,'Karachi University':24,'Port Qasim':35,'Clifton':5,'Tariq Road':12},
-  'Gulshan-e-Iqbal':{'I.I. Chundrigar (Downtown)':22,'Shaheed-e-Millat Road':18,'NUCES FAST':8,'IBA Karachi':10,'NED University':12,'Korangi Industrial':15,'Saddar':20,'Karachi University':14,'Port Qasim':22,'Clifton':20,'Tariq Road':18},
-  'Clifton':{'I.I. Chundrigar (Downtown)':12,'Shaheed-e-Millat Road':10,'NUCES FAST':20,'IBA Karachi':18,'NED University':22,'Korangi Industrial':28,'Saddar':11,'Karachi University':22,'Port Qasim':38,'Clifton':0,'Tariq Road':8},
-  'North Nazimabad':{'I.I. Chundrigar (Downtown)':14,'Shaheed-e-Millat Road':16,'NUCES FAST':20,'IBA Karachi':22,'NED University':8,'Korangi Industrial':24,'Saddar':13,'Karachi University':12,'Port Qasim':28,'Clifton':16,'Tariq Road':14},
-  'Gulistan-e-Jauhar':{'I.I. Chundrigar (Downtown)':25,'Shaheed-e-Millat Road':22,'NUCES FAST':10,'IBA Karachi':12,'NED University':14,'Korangi Industrial':10,'Saddar':23,'Karachi University':8,'Port Qasim':18,'Clifton':24,'Tariq Road':22},
-  'Nazimabad':{'I.I. Chundrigar (Downtown)':10,'Shaheed-e-Millat Road':12,'NUCES FAST':22,'IBA Karachi':20,'NED University':10,'Korangi Industrial':20,'Saddar':9,'Karachi University':16,'Port Qasim':28,'Clifton':14,'Tariq Road':10},
-  'Malir':{'I.I. Chundrigar (Downtown)':28,'Shaheed-e-Millat Road':26,'NUCES FAST':14,'IBA Karachi':22,'NED University':12,'Korangi Industrial':8,'Saddar':27,'Karachi University':18,'Port Qasim':14,'Clifton':30,'Tariq Road':26},
-  'Korangi':{'I.I. Chundrigar (Downtown)':22,'Shaheed-e-Millat Road':20,'NUCES FAST':16,'IBA Karachi':24,'NED University':18,'Korangi Industrial':4,'Saddar':21,'Karachi University':20,'Port Qasim':12,'Clifton':22,'Tariq Road':20},
-  'Orangi Town':{'I.I. Chundrigar (Downtown)':16,'Shaheed-e-Millat Road':18,'NUCES FAST':26,'IBA Karachi':28,'NED University':14,'Korangi Industrial':28,'Saddar':15,'Karachi University':18,'Port Qasim':38,'Clifton':20,'Tariq Road':16},
-};
-
-// ════════════════════════════════════════
-//  AUTH STATE
-// ════════════════════════════════════════
-
-function updateNavForUser(user) {
-  const btn = $('auth-btn');
-  const banner = $('verify-banner');
-  if (!btn) return;
-  if (user) {
-    const name = user.displayName || user.email.split('@')[0];
-    btn.textContent = name.split(' ')[0];
-    btn.onclick = () => showSection('profile');
-    btn.className = 'btn btn-outline btn-sm';
-    document.getElementById('signout-btn')?.classList.toggle('hidden', !user);
-    document.getElementById('mobile-signout')?.classList.toggle('hidden', !user);
-    document.getElementById('mobile-signin')?.classList.toggle('hidden', !!user);
-// sync notification badge to mobile
-const nb = document.getElementById('nb-badge');
-const mob = document.getElementById('mobile-notif-badge');
-if (mob && nb) mob.textContent = nb.textContent ? `(${nb.textContent})` : '';
-    const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-    if (!user.emailVerified && !isGoogle) {
-      banner.classList.remove('hidden');
-      const txt = $('verify-email-txt');
-      if (txt) txt.textContent = user.email;
-    } else {
-      banner.classList.add('hidden');
-      document.getElementById('signout-btn')?.classList.add('hidden');
-      
-    }
-  } else {
-    btn.textContent = 'Sign In';
-    btn.onclick = openAuthModal;
-    btn.className = 'btn btn-red btn-sm';
-    if (banner) banner.classList.add('hidden');
-  }
-}
-
-// ════════════════════════════════════════
-//  AUTH — SIGN UP
-// ════════════════════════════════════════
-
-function setAuthLoading(btnId, on, orig) {
-  const b = $(btnId);
-  if (!b) return;
-  b.disabled = on;
-  b.textContent = on ? 'Please wait…' : orig;
-  b.style.opacity = on ? '0.6' : '1';
-}
-function showAuthError(id, msg) {
-  const el = $(id);
-  if (!el) return;
-  el.textContent = msg; el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 7000);
-}
-function clearAuthErrors() {
-  ['auth-error','login-error'].forEach(id => { const e=$(id); if(e) e.classList.add('hidden'); });
-}
-
-async function handleSignUp() {
-  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
-  clearAuthErrors();
-  const name  = $('su-name')?.value?.trim();
-  const email = $('su-email')?.value?.trim();
-  const phone = $('su-phone')?.value?.trim();
-  const pass  = $('su-pass')?.value;
-  const areaSel = $('au-area');
-  const area = areaSel?.value === '__other__'
-    ? $('au-area-other')?.value?.trim() || 'Other'
-    : areaSel?.value || 'PECHS';
-
-  if (!name)  { showAuthError('auth-error','Enter your full name.'); return; }
-  if (!email) { showAuthError('auth-error','Enter your email address.'); return; }
-  if (!phone) { showAuthError('auth-error','Enter your WhatsApp number.'); return; }
-  if (!pass || pass.length < 6) { showAuthError('auth-error','Password must be at least 6 characters.'); return; }
-
-  setAuthLoading('su-btn', true, 'Create Account — Free →');
-  try {
-    const { user } = await FB().createUserWithEmailAndPassword(FB().auth, email, pass);
-    await FB().sendEmailVerification(user);
-    await FB().setDoc(FB().doc(FB().db,'users',user.uid), {
-      name, email, phone, area,
-      roles: Array.from(document.querySelectorAll('#su-roles .role-opt.on')).map(o=>o.querySelector('.role-lbl')?.textContent?.toLowerCase()).filter(Boolean),
-      rating: 0, totalRatings: 0, ridesDriven: 0, ridesJoined: 0,
-      vehicle: null, prefs: [], createdAt: FB().serverTimestamp(),
-    });
-    closeAuthModal();
-    showToast(`✓ Account created! Verify your email at ${email} to post rides.`,'info');
-  } catch(err) {
-    const m = {'auth/email-already-in-use':'Email already registered. Try logging in.','auth/invalid-email':'Enter a valid email.','auth/weak-password':'Password too weak (min 6 chars).'};
-    showAuthError('auth-error', m[err.code] || err.message);
-  } finally { setAuthLoading('su-btn', false, 'Create Account — Free →'); }
-}
-
-// ════════════════════════════════════════
-//  AUTH — LOGIN
-// ════════════════════════════════════════
-
-async function handleLogin() {
-  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
-  clearAuthErrors();
-  const email = $('li-email')?.value?.trim();
-  const pass  = $('li-pass')?.value;
-  if (!email) { showAuthError('login-error','Enter your email.'); return; }
-  if (!pass)  { showAuthError('login-error','Enter your password.'); return; }
-
-  setAuthLoading('li-btn', true, 'Log In →');
-  try {
-    await FB().signInWithEmailAndPassword(FB().auth, email, pass);
-    closeAuthModal();
-    showSection('find');
-  } catch(err) {
-    const m = {'auth/user-not-found':'No account with this email.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Enter a valid email.','auth/too-many-requests':'Too many attempts. Try again later.'};
-    showAuthError('login-error', m[err.code] || 'Login failed.');
-  } finally { setAuthLoading('li-btn', false, 'Log In →'); }
-}
-
-// ════════════════════════════════════════
-//  AUTH — GOOGLE
-// ════════════════════════════════════════
-
-async function signInWithGoogle() {
-  if (!FB()) { showToast('Add your Firebase config first.','err'); return; }
-  const btn = $('google-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
-  try {
-    const { user } = await FB().signInWithPopup(FB().auth, FB().googleProvider);
-    const ref = FB().doc(FB().db,'users',user.uid);
-    const snap = await FB().getDoc(ref);
-    if (!snap.exists()) {
-      await FB().setDoc(ref, {
-        name: user.displayName, email: user.email, phone: '', area: '',
-        roles: ['find'], rating: 0, totalRatings: 0,
-        ridesDriven: 0, ridesJoined: 0, vehicle: null, prefs: [],
-        createdAt: FB().serverTimestamp(),
-      });
-    }
-    closeAuthModal();
-    showSection('find');
-  } catch(err) {
-    if (err.code !== 'auth/popup-closed-by-user')
-      showToast('Google sign-in failed: ' + err.message,'err');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Continue with Google`;
-    }
-  }
-}
-
-async function handleForgotPassword() {
-  if (!FB()) return;
-  const email = $('li-email')?.value?.trim();
-  if (!email) { showAuthError('login-error','Enter your email above first.'); return; }
-  try {
-    await FB().sendPasswordResetEmail(FB().auth, email);
-    showToast(`Password reset email sent to ${email}`,'info');
-  } catch(err) {
-    showAuthError('login-error', err.code==='auth/user-not-found'?'No account with this email.':err.message);
-  }
-}
-
-async function resendVerification() {
-  if (!window._currentUser) return;
-  try { await FB().sendEmailVerification(window._currentUser); showToast('Verification email re-sent!','info'); }
-  catch(e) { showToast('Could not resend. Wait a minute and try again.','err'); }
-}
-
-async function handleSignOut() {
-  if (!FB()) return;
-  if (_ridesUnsubscribe) { _ridesUnsubscribe(); _ridesUnsubscribe = null; }
-  await FB().signOut(FB().auth);
-  showToast('Signed out.','info');
-  goHome();
-}
-
-function openAuthModal() { $('auth-modal').classList.add('open'); }
-function closeAuthModal() { $('auth-modal').classList.remove('open'); clearAuthErrors(); }
-function switchAuthTab(t) {
-  $('af-signup').classList.toggle('hidden', t!=='signup');
-  $('af-login').classList.toggle('hidden', t!=='login');
-  $('at-signup').classList.toggle('active', t==='signup');
-  $('at-login').classList.toggle('active', t==='login');
-  clearAuthErrors();
-}
-
-function requireAuth(action) {
-  const u = window._currentUser;
-  if (!u) { openAuthModal(); showToast('Sign in to '+action,'info'); return false; }
-  const isGoogle = u.providerData.some(p=>p.providerId==='google.com');
-  if (!u.emailVerified && !isGoogle) { showToast('Verify your email first. Check your inbox.','err'); return false; }
-  return true;
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — RIDES (real-time listener)
-// ════════════════════════════════════════
-
-function subscribeToRides() {
-  if (!FB()) { set('results-list',''); renderRides([]); return; }
-  loading('results-list');
-  // Clean up previous listener
-  if (_ridesUnsubscribe) _ridesUnsubscribe();
-
-  const q = FB().query(
-    FB().collection(FB().db,'rides'),
-    FB().where('active','==',true),
-    FB().orderBy('createdAt','desc')
-  );
-
-  _ridesUnsubscribe = FB().onSnapshot(q, (snap) => {
-    const rides = snap.docs.map(d => {
-      const data = d.data();
-      return {
-        id: d.id,
-        ...data,
-        init: (data.name||'?')[0].toUpperCase(),
-        color: data.color || '#E8380D',
-        tc: data.tc || '#fff',
-        isLive: true,
-      };
-    });
-    renderRides(rides);
-    // Live count badge
-    set('live-ride-count', rides.length + ' active rides today');
-  }, (err) => {
-    console.warn('Rides listener error:', err);
-    renderRides([]);
-  });
-}
-
-function renderRides(list) {
-  const el = $('results-list');
-  if (!el) return;
-
-  // Apply active filters
-  const from = getFromVal(), to = getToVal();
-  let r = [...list];
-  if (from) r = r.filter(x => x.from?.toLowerCase().includes(from.toLowerCase()));
-  if (to)   r = r.filter(x => x.to?.toLowerCase().includes(to.toLowerCase()));
-  if (activeFilters.has('ac'))       r = r.filter(x => x.prefs?.some(p=>p.includes('AC')));
-  if (activeFilters.has('female'))   r = r.filter(x => x.tags?.some(t=>t.includes('Female')));
-  if (activeFilters.has('daily'))    r = r.filter(x => x.tags?.includes('Daily'));
-  if (activeFilters.has('students')) r = r.filter(x => x.tags?.some(t=>t.includes('Student')));
-  if (activeFilters.has('verified')) r = r.filter(x => x.tags?.includes('Verified'));
-  if (activeFilters.has('morning'))  r = r.filter(x => parseInt(x.time) < 9);
-  if (activeFilters.has('bike'))     r = r.filter(x => x.vtype === 'bike');
-  if (activeFilters.has('car'))      r = r.filter(x => x.vtype === 'car');
-  if (activeFilters.has('pillion'))  r = r.filter(x => x.vtype === 'bike' && x.total === 1);
-
-  if (!r.length) {
-    el.innerHTML = `<div class="no-results">
-      ${list.length === 0
-        ? '😔 No rides posted yet in Karachi. <button class="btn-ghost" onclick="showSection(\'offer\')">Be the first to offer a ride →</button>'
-        : '😔 No rides match your filters. Try removing some filters.'}
-    </div>`;
-    return;
-  }
-
-  el.innerHTML = r.map(ride => `
-    <div class="ride-card" onclick="viewDetail('${ride.id}')">
-      <div class="avatar rc-av" style="background:${ride.color};color:${ride.tc}">${ride.init}</div>
-      <div>
-        <div class="rc-route">${ride.from} → ${ride.to}</div>
-        <div class="rc-meta">${ride.name} · ${ride.vtype==='bike'?'🏍️':'🚗'} ${ride.car} · ${ride.time} · ${ride.ml} km/L</div>
-        <div class="rc-tags">
-          <span class="tag ${ride.vtype==='bike'?'tag-blue':'tag-green'}">${ride.vtype==='bike'?'🏍️ Bike':'🚗 Car'}</span>
-          ${(ride.tags||[]).filter(t=>t!=='Car'&&t!=='Bike').map(t=>`<span class="tag${t==='Verified'?' tag-green':t.includes('Female')?' tag-blue':''}">${t}</span>`).join('')}
-        </div>
-      </div>
-      <div class="rc-right">
-        <div class="rc-cost">Rs.${ride.cost}</div>
-        <div class="rc-cost-lbl">per person / trip</div>
-        <div class="rc-seats">${ride.seats} seat${ride.seats!==1?'s':''} left of ${ride.total}</div>
-        <button class="btn btn-red btn-sm" style="margin-top:.4rem;width:100%" onclick="event.stopPropagation();viewDetail('${ride.id}')">View Details →</button>
-      </div>
-    </div>
-  `).join('');
-
-  // Store globally for detail lookup
-  window._loadedRides = list;
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — RIDE DETAIL
-// ════════════════════════════════════════
-
-function estimateArr(time, dist) {
-  const clean = time.replace(/ AM| PM/,'');
-  const [hh, mm] = clean.split(':').map(Number);
-  const mins = Math.round(dist/28*60) + 8;
-  const total = mm + mins;
-  const arrH = hh + Math.floor(total/60), arrM = total%60;
-  return `${arrH}:${arrM.toString().padStart(2,'0')} ${arrH<12?'AM':'PM'}`;
-}
-
-async function viewDetail(id) {
-  // First try loaded rides cache, then fetch from Firestore
-  let r = (window._loadedRides||[]).find(x=>x.id===id);
-  if (!r && FB()) {
-    try {
-      const snap = await FB().getDoc(FB().doc(FB().db,'rides',id));
-      if (snap.exists()) r = { id: snap.id, ...snap.data(), init:(snap.data().name||'?')[0].toUpperCase() };
-    } catch(e) { showToast('Could not load ride details.','err'); return; }
-  }
-  if (!r) { showToast('Ride not found.','err'); return; }
-
-  const d = (DIST[r.from]&&DIST[r.from][r.to]) || 12;
-  const tripCost = Math.round((d/r.ml)*PETROL);
-  const taken = r.total - r.seats;
-  const isBike = r.vtype === 'bike';
-  const vIcon = isBike ? '🏍️' : '🚗';
-  const waNum = formatWANumber(r.phone||'');
-  const waMsg = encodeURIComponent(`Salam ${r.name}! I found your ride on SaathChalo — ${r.from} → ${r.to} at ${r.time}. Can I join? (Rs.${r.cost}/trip)`);
-
-  $('detail-content').innerHTML = `
-    <div class="detail-grid">
-      <div>
-        <div class="detail-card">
-          <h3>📍 Route</h3>
-          <div class="route-line">
-            <div class="rdot"><div class="rdot-place">${r.from}</div><div class="rdot-time">Departure · ${r.time}</div></div>
-            <div class="rdot"><div class="rdot-place">${r.to}</div><div class="rdot-time">Est. arrival · ${estimateArr(r.time, d)}</div></div>
-          </div>
-          <div class="map-ph">
-            <span style="font-size:2rem;position:relative;z-index:1">${vIcon}</span>
-            <span style="font-size:.78rem;color:rgba(255,255,255,.3);position:relative;z-index:1">${r.from} → ${r.to} · ~${d} km</span>
-          </div>
-          <div class="stats-row">
-            <div class="stat-mini"><div class="stat-mini-val">${d} km</div><div class="stat-mini-lbl">Distance</div></div>
-            <div class="stat-mini"><div class="stat-mini-val">~${Math.round(d/28*60)} min</div><div class="stat-mini-lbl">Est. time</div></div>
-            <div class="stat-mini"><div class="stat-mini-val">${(d/r.ml).toFixed(1)} L</div><div class="stat-mini-lbl">Fuel used</div></div>
-          </div>
-        </div>
-        <div class="detail-card">
-          <h3>${isBike?'🏍️ Rider':'🚗 Driver'} Profile</h3>
-          <div class="driver-profile-row">
-            <div class="avatar dp-av" style="background:${r.color||'#E8380D'};color:${r.tc||'#fff'}">${r.init}</div>
-            <div>
-              <div class="dp-name">${r.name}</div>
-              <div class="dp-meta">${vIcon} ${r.car} · ${r.plate||'—'} · ${r.ml} km/L</div>
-              <div class="dp-rating">
-                <span style="color:#F4C430">${starsHTML(r.rating||0)}</span>
-                <span>${r.rating ? r.rating.toFixed(1)+' rating' : 'No ratings yet'} · ${r.ridesDriven||r.trips||0} rides</span>
-              </div>
-            </div>
-          </div>
-          <div style="font-size:.82rem;color:var(--muted);padding:.8rem;background:var(--black);border:1px solid var(--border);line-height:1.6;margin-bottom:.8rem">"${r.about||'Posted on SaathChalo.'}"</div>
-          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem">
-            ${(r.prefs||[]).map(p=>`<span class="tag tag-green">${p}</span>`).join('')}
-            ${(r.tags||[]).filter(t=>t!=='Car'&&t!=='Bike').map(t=>`<span class="tag${t==='Verified'?' tag-green':''}">${t}</span>`).join('')}
-          </div>
-          <div style="padding:1rem;background:var(--black);border:1px solid var(--border)">
-            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">📱 Contact ${r.name} on WhatsApp</div>
-            <a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener"
-               style="display:flex;align-items:center;gap:.6rem;background:#25D366;color:#fff;padding:.65rem 1rem;font-weight:700;font-size:.85rem;text-decoration:none">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              Open WhatsApp Chat
-            </a>
-            <div style="font-size:.68rem;color:var(--muted);margin-top:.5rem">Opens WhatsApp with a pre-written message about this ride. The message is editable before sending.</div>
-          </div>
-        </div>
-        <div class="detail-card">
-          <h3>💺 Seat Availability</h3>
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:.7rem">${r.seats} of ${r.total} seat${r.total>1?'s':''} available</div>
-          <div class="seat-slots">
-            <div class="slot" title="${isBike?'Rider':'Driver'}">${vIcon}</div>
-            ${Array(taken).fill(`<div class="slot taken" title="Taken">✓</div>`).join('')}
-            ${Array(r.seats).fill(`<div class="slot free" title="Available">+</div>`).join('')}
-          </div>
-          ${isBike?`<div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.5">⚠️ Bike — only 1 pillion. Discuss helmet before meeting.</div>`:''}
-        </div>
-      </div>
-      <div>
-        <div class="cost-breakdown">
-          <div style="font-family:var(--fd);font-size:.95rem;margin-bottom:.9rem">📊 Cost Breakdown</div>
-          <div class="cb-row"><span class="cl">Distance</span><span class="cv">${d} km</span></div>
-          <div class="cb-row"><span class="cl">Petrol rate</span><span class="cv">Rs.${PETROL}/L</span></div>
-          <div class="cb-row"><span class="cl">Full fuel cost</span><span class="cv" style="color:var(--red)">Rs.${tripCost}</span></div>
-          <div class="cb-row"><span class="cl">Split ${r.total+1} ways</span><span class="cv">÷ ${r.total+1}</span></div>
-          <div class="cb-row total"><span class="cl" style="font-weight:700;color:var(--cream)">Your share</span><span class="cv">Rs.${r.cost}</span></div>
-          <div style="margin-top:.8rem;padding:.8rem;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.25);font-size:.75rem;color:var(--muted);line-height:1.5">
-            💸 Pay <strong style="color:var(--green)">Rs.${r.cost}</strong> to ${r.name} — cash or EasyPaisa.<br>
-            26 days/month: <strong style="color:var(--green)">Rs.${(r.cost*26).toLocaleString()}</strong> vs Rs.${(tripCost*2*26).toLocaleString()} solo.
-          </div>
-        </div>
-        <div class="cost-breakdown">
-          <div style="font-family:var(--fd);font-size:.95rem;margin-bottom:.8rem">📋 Ride Rules</div>
-          <ul class="rules-list">
-            ${(r.prefs||[]).map(p=>`<li>${p}</li>`).join('')}
-            <li>Be at pickup on time</li>
-            ${isBike?'<li>Discuss helmet before meeting</li>':'<li>No food in car</li>'}
-            <li>Coordinate via WhatsApp</li>
-          </ul>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:.6rem">
-          ${r.seats > 0 ? `
-            <button class="btn btn-red btn-full" onclick="requestJoin('${r.id}')">Request to Join →</button>
-            <a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener"
-               class="btn btn-outline btn-full"
-               style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;padding:.75rem 1.5rem">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              WhatsApp ${r.name} Directly
-            </a>
-          ` : `
-            <button class="btn btn-outline btn-full" style="opacity:.5;cursor:default" disabled>This Ride is Full</button>
-            <button class="btn-ghost btn-full btn-sm" style="border:1px solid var(--border);padding:.6rem"
-              onclick="showToast('You will be notified if a seat opens!','info')">🔔 Notify Me If Seat Opens</button>
-          `}
-          <div style="font-size:.7rem;color:var(--muted);text-align:center;line-height:1.5">
-            Sending a request notifies the driver. WhatsApp opens with a pre-filled intro message.
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.querySelectorAll('.ap-section').forEach(el=>el.classList.remove('active'));
-  $('ap-detail').classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function backToFind() {
-  $('ap-detail').classList.remove('active');
-  $('ap-find').classList.add('active');
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — SUBMIT RIDE
-// ════════════════════════════════════════
-
-async function submitOffer() {
-  if (!requireAuth('post a ride')) return;
-  const isBike = currentVehicleType === 'bike';
-  const fromSel = $('o-from'), toSel = $('o-to');
-  const from = fromSel?.value==='__other__' ? ($('o-from-other')?.value?.trim()||'') : fromSel?.value;
-  const to   = toSel?.value==='__other__'   ? ($('o-to-other')?.value?.trim()||'')   : toSel?.value;
-  const name = $('o-name')?.value?.trim();
-  const wa   = $('o-wa')?.value?.trim();
-  const carSel = $(isBike?'o-bike':'o-car');
-  const carVal = carSel?.value?.includes('Other') ? ($(isBike?'o-bike-other':'o-car-other')?.value?.trim()) : carSel?.value;
-  const mileageEl = $(isBike?'o-mileage-bike':'o-mileage');
-  const mileage = parseFloat(mileageEl?.value || (isBike?35:13));
-  const seats = parseInt($('o-seats')?.value||2);
-  const time  = $('o-time')?.value||'08:00';
-  const plate = $(isBike?'o-plate-bike':'o-plate')?.value?.trim();
-  const schedule = document.querySelector('#ap-offer select:nth-of-type(4)')?.value || 'Mon–Fri (Daily)';
-
-  if (!from) { showToast('Select your starting area.','err'); return; }
-  if (!to)   { showToast('Select your destination.','err'); return; }
-  if (!name) { showToast('Enter your name.','err'); return; }
-  if (!wa)   { showToast('Enter your WhatsApp number.','err'); return; }
-
-  const dist = (DIST[from]&&DIST[from][to]) || 12;
-  const cost = Math.round((dist/mileage)*PETROL/(seats+1));
-  const prefs = Array.from(document.querySelectorAll('#ap-offer .pref-tog.on')).map(el=>el.textContent.trim());
-  const tags = [];
-  if (!isBike) tags.push('Car'); else tags.push('Bike');
-  if (prefs.some(p=>p.includes('AC'))) tags.push('AC');
-  if (prefs.some(p=>p.includes('Female'))) tags.push('Female Only');
-  if (prefs.some(p=>p.includes('Student'))) tags.push('Students');
-  if (schedule.includes('Daily')||schedule.includes('Mon–Fri')) tags.push('Daily');
-
-  const avatarColors = ['#E8380D','#2ECC71','#3B82F6','#9B59B6','#F4C430','#E91E63'];
-  const color = avatarColors[Math.floor(Math.random()*avatarColors.length)];
-
-  const rideData = {
-    driverUid: window._currentUser.uid,
-    name, phone: wa, from, to,
-    time: time.includes(':') ? convertTo12Hr(time) : time,
-    car: carVal, plate: plate||'', ml: mileage,
-    seats, total: seats, cost, vtype: isBike?'bike':'car',
-    prefs, tags, active: true, color, tc: '#fff',
-    about: `${isBike?'Bike':'Car'} ride posted on SaathChalo. ${prefs.join(', ')}.`,
-    schedule, rating: 0, totalRatings: 0, ridesDriven: 0,
-    createdAt: FB().serverTimestamp(),
-  };
-
-  const btn = document.querySelector('#ap-offer .btn-red.btn-full');
-  if (btn) { btn.disabled=true; btn.textContent='Posting…'; }
-  try {
-    await FB().addDoc(FB().collection(FB().db,'rides'), rideData);
-    await FB().updateDoc(FB().doc(FB().db,'users',window._currentUser.uid), {
-      ridesDriven: FB().increment(1)
-    });
-    // Reset form
-    ['o-name','o-wa','o-plate','o-plate-bike'].forEach(id=>{const e=$(id);if(e)e.value='';});
-    document.querySelectorAll('#ap-offer .pref-tog.on').forEach(el=>el.classList.remove('on'));
-    showToast('✓ Ride posted! It now appears live in Find a Ride.');
-    setTimeout(()=>showSection('myrides'),1200);
-  } catch(e) {
-    showToast('Error posting ride: '+e.message,'err');
-  } finally {
-    if (btn) { btn.disabled=false; btn.textContent='Post My Ride →'; }
-  }
-}
-
-function convertTo12Hr(time24) {
-  const [h,m] = time24.split(':').map(Number);
-  return `${h===0?12:h>12?h-12:h}:${m.toString().padStart(2,'0')} ${h<12?'AM':'PM'}`;
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — JOIN REQUEST
-// ════════════════════════════════════════
-
-async function requestJoin(rideId) {
-  if (!requireAuth('request to join a ride')) return;
-  const ride = (window._loadedRides||[]).find(x=>x.id===rideId);
-  const user = window._currentUser;
-
-  if (ride && ride.driverUid === user.uid) {
-    showToast('You cannot join your own ride.','err'); return;
-  }
-
-  const btn = document.querySelector(`[onclick="requestJoin('${rideId}')"]`);
-  if (btn) { btn.disabled=true; btn.textContent='Sending…'; }
-  try {
-    // Check for duplicate request
-    const existing = await FB().getDocs(
-      FB().query(FB().collection(FB().db,'requests'),
-        FB().where('rideId','==',rideId), FB().where('riderId','==',user.uid))
-    );
-    if (!existing.empty) { showToast('You already sent a request for this ride.','info'); return; }
-
-    await FB().addDoc(FB().collection(FB().db,'requests'), {
-      rideId, riderId: user.uid, riderName: user.displayName||user.email.split('@')[0],
-      riderEmail: user.email, driverUid: ride?.driverUid||'',
-      from: ride?.from||'', to: ride?.to||'', status: 'pending',
-      createdAt: FB().serverTimestamp(),
-    });
-    // Notify driver
-    if (ride?.driverUid) {
-      await FB().addDoc(FB().collection(FB().db,'notifications'), {
-        uid: ride.driverUid, type: 'request',
-        icon: '🙋',
-        title: `${user.displayName||'Someone'} wants to join your ride`,
-        body: `${user.displayName||user.email.split('@')[0]} requested to join your ${ride.from} → ${ride.to} ride.`,
-        rideId, requesterId: user.uid, read: false,
-        createdAt: FB().serverTimestamp(),
-      });
-    }
-    showToast('✓ Request sent! The driver will be notified.');
-  } catch(e) {
-    showToast('Error: '+e.message,'err');
-  } finally {
-    if (btn) { btn.disabled=false; btn.textContent='Request to Join →'; }
-  }
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — MY RIDES (real-time)
-// ════════════════════════════════════════
-
-function subscribeToMyRides(uid) {
-  if (!FB() || !uid) return;
-  loading('my-offered');
-  loading('my-joined');
-  loading('my-history');
-
-  // Offered rides (driver)
-  const offeredQ = FB().query(
-    FB().collection(FB().db,'rides'),
-    FB().where('driverUid','==',uid),
-    FB().orderBy('createdAt','desc')
-  );
-  FB().onSnapshot(offeredQ, async (snap) => {
-    const rides = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const active  = rides.filter(r=>r.active);
-    const history = rides.filter(r=>!r.active);
-
-    // Count badge
-    const countEl = $('mrt-offered-count');
-    if (countEl) countEl.textContent = active.length ? `(${active.length})` : '';
-
-    if (!active.length) {
-      empty('my-offered','You haven\'t offered any rides yet. <button class="btn-ghost" onclick="showSection(\'offer\')">Post your first ride →</button>');
-    } else {
-      // For each active ride, also fetch pending requests
-      const ridesWithRequests = await Promise.all(active.map(async r => {
-        const reqSnap = await FB().getDocs(
-          FB().query(FB().collection(FB().db,'requests'),
-            FB().where('rideId','==',r.id), FB().where('status','==','pending'))
-        );
-        return { ...r, pendingRequests: reqSnap.docs.map(d=>({id:d.id,...d.data()})) };
-      }));
-      $('my-offered').innerHTML = ridesWithRequests.map(r => renderOfferedCard(r)).join('');
-    }
-
-    // History tab
-    if (!history.length) {
-      empty('my-history','No completed rides yet.');
-    } else {
-      $('my-history').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        ${history.map(r=>`
-          <div class="mrc" style="margin:0">
-            <div class="mrc-hdr"><div>
-              <div class="mrc-route" style="font-size:.85rem">${r.from} → ${r.to}</div>
-              <div class="mrc-meta">${r.time} · ${r.car}</div>
-            </div><span class="badge badge-muted">Done</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem">
-              <div style="font-family:var(--fd);font-size:1rem;color:var(--green)">Rs.${r.cost}</div>
-              <div class="stars">${starsHTML(r.rating||0)}</div>
-            </div>
-          </div>`).join('')}
-      </div>`;
-    }
-
-    // Dashboard stats
-    set('dd-rides', rides.length);
-    set('dd-fuel', 'Rs.'+(rides.reduce((a,r)=>a+(r.cost*(r.total||1)*26),0)).toLocaleString());
-
-    // Dashboard routes
-    if (!active.length) {
-      empty('dashboard-routes','No active routes. <button class="btn-ghost" onclick="showSection(\'offer\')">Post your first ride →</button>');
-    } else {
-      $('dashboard-routes').innerHTML = active.map(r=>`
-        <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-          <div>
-            <div style="font-family:var(--fd)">${r.from} → ${r.to}</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:.25rem">${r.schedule||'Daily'} · ${r.time} · ${r.seats} seat${r.seats!==1?'s':''} left · ${r.car}</div>
-          </div>
-          <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-outline btn-sm" onclick="pauseRide('${r.id}','${r.active}')">⏸ Pause</button>
-            <button class="btn-ghost btn-sm" onclick="deleteRide('${r.id}')">🗑 Delete</button>
-          </div>
-        </div>`).join('');
-    }
-  });
-
-  // Joined rides (passenger)
-  const joinedQ = FB().query(
-    FB().collection(FB().db,'requests'),
-    FB().where('riderId','==',uid),
-    FB().orderBy('createdAt','desc')
-  );
-  FB().onSnapshot(joinedQ, snap => {
-    const reqs = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const countEl = $('mrt-joined-count');
-    if (countEl) countEl.textContent = reqs.length ? `(${reqs.length})` : '';
-    if (!reqs.length) {
-      empty('my-joined','You haven\'t joined any rides yet. <button class="btn-ghost" onclick="showSection(\'find\')">Find a ride →</button>');
-    } else {
-      $('my-joined').innerHTML = reqs.map(req => `
-        <div class="mrc">
-          <div class="mrc-hdr"><div>
-            <div class="mrc-route">${req.from} → ${req.to}</div>
-            <div class="mrc-meta">Requested ${timeAgo(req.createdAt)}</div>
-          </div>
-          <span class="badge ${req.status==='accepted'?'badge-green':req.status==='declined'?'badge-red':'badge-yellow'}">
-            ${req.status==='accepted'?'✓ Confirmed':req.status==='declined'?'✕ Declined':'⏳ Pending'}
-          </span></div>
-          <div class="mrc-actions">
-            ${req.status==='accepted' ? `
-              <button class="btn btn-outline btn-sm" onclick="showSection('active')">🟢 Track</button>
-              <button class="btn btn-outline btn-sm" onclick="openRateModal()">⭐ Rate</button>
-            ` : req.status==='pending' ? `
-              <button class="btn-ghost btn-sm" onclick="cancelRequest('${req.id}')">✕ Cancel</button>
-            ` : ''}
-          </div>
-        </div>`).join('');
-    }
-  });
-
-  // Dashboard pending requests
-  const pendingQ = FB().query(
-    FB().collection(FB().db,'requests'),
-    FB().where('driverUid','==',uid), FB().where('status','==','pending')
-  );
-  FB().onSnapshot(pendingQ, snap => {
-    const reqs = snap.docs.map(d=>({id:d.id,...d.data()}));
-    set('dd-pending', reqs.length);
-    if (!reqs.length) {
-      empty('dashboard-requests','No pending requests. Passengers will appear here when they request your rides.');
-    } else {
-      $('dashboard-requests').innerHTML = reqs.map(req=>`
-        <div class="req-card">
-          <div class="avatar" style="width:44px;height:44px;font-size:1.1rem;background:var(--red)">${(req.riderName||'?')[0].toUpperCase()}</div>
-          <div>
-            <div class="req-name">${req.riderName}</div>
-            <div class="req-meta">${req.riderEmail} · Requested ${timeAgo(req.createdAt)}</div>
-            <div class="req-area">📍 ${req.from} → ${req.to}</div>
-          </div>
-          <div class="req-actions">
-            <button class="btn btn-green btn-sm" onclick="acceptRequest('${req.id}','${req.rideId}','${req.riderId}')">✓ Accept</button>
-            <button class="btn btn-outline btn-sm" onclick="declineRequest('${req.id}','${req.riderId}')">✕ Decline</button>
-          </div>
-        </div>`).join('');
-    }
-  });
-}
-
-function renderOfferedCard(r) {
-  const hasPending = r.pendingRequests && r.pendingRequests.length > 0;
-  return `<div class="mrc">
-    <div class="mrc-hdr"><div>
-      <div class="mrc-route">${r.from} → ${r.to}</div>
-      <div class="mrc-meta">${r.schedule||'Daily'} · ${r.time} · ${r.car} · ${r.ml} km/L</div>
-    </div>
-    <span class="badge ${hasPending?'badge-yellow':'badge-green'}">${hasPending?`${r.pendingRequests.length} Pending`:'Active'}</span></div>
-    <div class="mrc-body">
-      <div>
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:.35rem">${r.seats} seat${r.seats!==1?'s':''} left of ${r.total}</div>
-        ${hasPending ? `<div style="font-size:.78rem;color:var(--yellow);margin-top:.3rem">⏳ ${r.pendingRequests.length} passenger${r.pendingRequests.length>1?'s':''} waiting for your response</div>` : ''}
-      </div>
-      <div style="text-align:right">
-        <div class="earn-val">Rs.${r.cost * r.total}<span style="font-size:.75rem;font-family:var(--fb);color:var(--muted)">/day</span></div>
-        <div class="earn-lbl">Max you collect</div>
-      </div>
-    </div>
-    <div class="mrc-actions">
-      <button class="btn btn-outline btn-sm" onclick="showSection('dashboard')">📊 Manage</button>
-      <button class="btn-ghost btn-sm" onclick="pauseRide('${r.id}',${r.active})">⏸ Pause</button>
-      <button class="btn-ghost btn-sm" onclick="deleteRide('${r.id}')">🗑 Delete</button>
-    </div>
-  </div>`;
-}
-
-async function acceptRequest(reqId, rideId, riderId) {
-  if (!FB()) return;
-  try {
-    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'accepted' });
-    // Decrement available seats
-    await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { seats: FB().increment(-1) });
-    // Notify rider
-    await FB().addDoc(FB().collection(FB().db,'notifications'), {
-      uid: riderId, type: 'accepted', icon: '✅',
-      title: 'Your ride request was accepted!',
-      body: 'The driver confirmed your seat. Check My Rides for details.',
-      rideId, read: false, createdAt: FB().serverTimestamp(),
-    });
-    showToast('✓ Request accepted! Rider has been notified.');
-  } catch(e) { showToast('Error: '+e.message,'err'); }
-}
-
-async function declineRequest(reqId, riderId) {
-  if (!FB()) return;
-  try {
-    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'declined' });
-    await FB().addDoc(FB().collection(FB().db,'notifications'), {
-      uid: riderId, type: 'declined', icon: '❌',
-      title: 'Ride request declined',
-      body: 'The driver declined your request. Find another ride.',
-      read: false, createdAt: FB().serverTimestamp(),
-    });
-    showToast('Request declined. Rider has been notified.','info');
-  } catch(e) { showToast('Error: '+e.message,'err'); }
-}
-
-async function cancelRequest(reqId) {
-  if (!FB()) return;
-  try {
-    await FB().updateDoc(FB().doc(FB().db,'requests',reqId), { status: 'cancelled' });
-    showToast('Request cancelled.','info');
-  } catch(e) { showToast('Error: '+e.message,'err'); }
-}
-
-async function pauseRide(rideId, currentlyActive) {
-  if (!FB()) return;
-  const newState = currentlyActive === 'true' ? false : true;
-  await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { active: newState });
-  showToast(newState ? 'Ride activated.' : 'Ride paused. It won\'t appear in search.','info');
-}
-
-async function deleteRide(rideId) {
-  if (!confirm('Delete this ride? This cannot be undone.')) return;
-  if (!FB()) return;
-  await FB().updateDoc(FB().doc(FB().db,'rides',rideId), { active: false });
-  showToast('Ride deleted.','err');
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — NOTIFICATIONS (real-time)
-// ════════════════════════════════════════
-
-function subscribeToNotifications(uid) {
-  if (!FB() || !uid) return;
-  const q = FB().query(
-    FB().collection(FB().db,'notifications'),
-    FB().where('uid','==',uid),
-    FB().orderBy('createdAt','desc')
-  );
-  FB().onSnapshot(q, snap => {
-    const notifs = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const unread = notifs.filter(n=>!n.read).length;
-
-    // Update badge
-    const badge = $('nb-badge');
-    if (badge) { badge.textContent = unread||''; badge.style.display = unread?'':'none'; }
-    const ndot = $('ndot');
-    if (ndot) ndot.style.display = unread ? '' : 'none';
-
-    // Render list
-    const el = $('notif-list');
-    if (!el) return;
-    if (!notifs.length) {
-      el.innerHTML = `<div class="no-results">No notifications yet.</div>`; return;
-    }
-    el.innerHTML = notifs.map(n=>`
-      <div class="ni ${n.read?'':'unread'}" onclick="markNotifRead('${n.id}')">
-        <div class="ni-icon">${n.icon||'🔔'}</div>
-        <div>
-          <div class="ni-title">${n.title}</div>
-          <div class="ni-body">${n.body}</div>
-          ${n.type==='request'?`
-            <div style="display:flex;gap:.5rem;margin-top:.6rem">
-              <button class="btn btn-green btn-sm" onclick="event.stopPropagation();acceptRequest('${n.id}','${n.rideId}','${n.requesterId}')">✓ Accept</button>
-              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();declineRequest('${n.id}','${n.requesterId}')">✕ Decline</button>
-            </div>` : ''}
-        </div>
-        <div class="ni-time">${timeAgo(n.createdAt)}</div>
-      </div>`).join('');
-
-    set('notif-sub', unread ? `${unread} unread` : 'All caught up ✓');
-  });
-}
-
-async function markNotifRead(id) {
-  if (!FB()) return;
-  await FB().updateDoc(FB().doc(FB().db,'notifications',id), { read: true }).catch(()=>{});
-}
-
-async function markAllRead() {
-  const user = window._currentUser;
-  if (!user || !FB()) return;
-  const snap = await FB().getDocs(
-    FB().query(FB().collection(FB().db,'notifications'),
-      FB().where('uid','==',user.uid), FB().where('read','==',false))
-  );
-  snap.docs.forEach(d => FB().updateDoc(d.ref, { read: true }));
-  showToast('All notifications marked as read.','info');
-}
-
-// ════════════════════════════════════════
-//  FIRESTORE — USER PROFILE
-// ════════════════════════════════════════
-
-async function loadUserProfile(uid) {
-  if (!FB()) return;
-  try {
-    const snap = await FB().getDoc(FB().doc(FB().db,'users',uid));
-    if (!snap.exists()) return;
-    const d = snap.data();
-
-    // Sidebar / nav name
-    const displayName = d.name || window._currentUser?.displayName || window._currentUser?.email?.split('@')[0] || '—';
-
-    // Profile card
-    set('profile-display-name', displayName);
-    set('profile-display-role', `${d.area||'Karachi'}`);
-    set('profile-av-init', displayName[0]?.toUpperCase()||'?');
-
-    const rating = d.totalRatings > 0 ? (d.rating / d.totalRatings).toFixed(1) : null;
-    $('profile-stars').innerHTML = starsHTML(rating ? parseFloat(rating) : 0);
-    set('profile-rating-line', rating ? `${rating} rating · ${d.ridesDriven||0} rides driven` : 'No rides yet');
-    set('ps-driven', d.ridesDriven||0);
-    set('ps-joined', d.ridesJoined||0);
-    set('ps-saved', 'Rs.'+((d.ridesJoined||0)*110).toLocaleString());
-
-    // Vehicle card
-    if (d.vehicle?.model) {
-      $('profile-vehicle-card').innerHTML = `
-        <div style="font-size:1.8rem">${d.vehicle.type==='bike'?'🏍️':'🚗'}</div>
-        <div>
-          <div style="font-weight:600;font-size:.9rem">${d.vehicle.model} ${d.vehicle.year||''}</div>
-          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">${d.vehicle.plate||'—'} · ${d.vehicle.color||''} · ${d.vehicle.mileage||'—'} km/L</div>
-        </div>`;
-    }
-
-    // Dashboard stats
-    if (rating) set('dd-rating', '★ '+rating);
-    set('dd-rides', d.ridesDriven||0);
-
-    // Form fields
-    setVal('p-name', d.name);
-    setVal('p-phone', d.phone);
-    setVal('p-email', d.email || window._currentUser?.email);
-
-    // Area select
-    const areaEl = $('p-area');
-    if (areaEl && d.area) {
-      const opt = Array.from(areaEl.options).find(o=>o.value===d.area||o.text===d.area);
-      if (opt) areaEl.value = opt.value;
-      else {
-        areaEl.value = '__other__';
-        handleProfileAreaOther();
-        setVal('p-area-other', d.area);
-      }
-    }
-
-    // Gender
-    if (d.gender) setVal('p-gender', d.gender);
-
-    // Vehicle fields
-    if (d.vehicle) {
-      const carEl = $('p-car');
-      if (carEl && d.vehicle.model) {
-        const opt = Array.from(carEl.options).find(o=>o.value===d.vehicle.model||o.text===d.vehicle.model);
-        if (opt) carEl.value = opt.value;
-        else { carEl.value='__other__'; handleProfileCarOther(); setVal('p-car-other', d.vehicle.model); }
-      }
-      setVal('p-car-year', d.vehicle.year);
-      setVal('p-plate', d.vehicle.plate);
-      setVal('p-mileage', d.vehicle.mileage);
-      setVal('p-color', d.vehicle.color);
-      if (d.vehicle.ac !== undefined) setVal('p-ac', d.vehicle.ac?'Yes':'No');
-    }
-
-    // Prefs toggles
-    if (d.prefs?.length) {
-      document.querySelectorAll('#profile-prefs .pref-tog').forEach(el => {
-        const text = el.textContent.replace(/[^\w\s]/g,'').trim().toLowerCase();
-        if (d.prefs.some(p=>p.toLowerCase().includes(text.split(' ')[0]))) el.classList.add('on');
-      });
-    }
-
-    // Reviews
-    loadReviews(uid);
-  } catch(e) { console.warn('Profile load failed', e); }
-}
-
-async function loadReviews(uid) {
-  if (!FB()) return;
-  try {
-    const snap = await FB().getDocs(
-      FB().query(FB().collection(FB().db,'reviews'), FB().where('driverUid','==',uid), FB().orderBy('createdAt','desc'))
-    );
-    const reviews = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const el = $('profile-reviews');
-    if (!el) return;
-    if (!reviews.length) {
-      el.innerHTML='<div style="font-size:.82rem;color:var(--muted);padding:1rem;background:var(--black);border:1px solid var(--border)">No reviews yet. Complete rides to receive ratings.</div>';
-      return;
-    }
-    el.innerHTML = reviews.map(r=>`
-      <div class="review-item">
-        <div class="review-hdr">
-          <div style="font-weight:600;font-size:.85rem">${r.raterName}</div>
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <div class="stars" style="font-size:.8rem">${starsHTML(r.rating)}</div>
-            <span style="font-size:.7rem;color:var(--muted)">${timeAgo(r.createdAt)}</span>
-          </div>
-        </div>
-        <div style="font-size:.8rem;color:var(--muted)">${r.comment||''}</div>
-      </div>`).join('');
-  } catch(e) {}
-}
-
-async function saveProfile() {
-  if (!requireAuth('save profile')) return;
-  const uid = window._currentUser.uid;
-
-  const areaEl = $('p-area');
-  const area = areaEl?.value==='__other__' ? ($('p-area-other')?.value?.trim()||'') : areaEl?.value;
-  const carEl = $('p-car');
-  const carModel = carEl?.value==='__other__' ? ($('p-car-other')?.value?.trim()||'') : (carEl?.value||'');
-
-  const prefs = Array.from(document.querySelectorAll('#profile-prefs .pref-tog.on')).map(el=>el.textContent.trim());
-
-  const updates = {
-    name: $('p-name')?.value?.trim()||'',
-    phone: $('p-phone')?.value?.trim()||'',
-    area, gender: $('p-gender')?.value||'',
-    prefs,
-    vehicle: carModel ? {
-      model: carModel, year: $('p-car-year')?.value||'',
-      plate: $('p-plate')?.value?.trim()||'', mileage: $('p-mileage')?.value||'',
-      color: $('p-color')?.value?.trim()||'', ac: $('p-ac')?.value==='Yes',
-      type: ['CD 70','CG 125','CB 150F','YBR','GS 150','70cc'].some(k=>carModel.includes(k)) ? 'bike' : 'car',
-    } : null,
-    updatedAt: FB().serverTimestamp(),
-  };
-
-  if (!updates.name) { showToast('Name cannot be empty.','err'); return; }
-
-  const btn = document.querySelector('#ap-profile .btn-red');
-  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
-  try {
-    await FB().updateDoc(FB().doc(FB().db,'users',uid), updates);
-    // Refresh card
-    set('profile-display-name', updates.name);
-    set('profile-av-init', updates.name[0]?.toUpperCase()||'?');
-    set('profile-display-role', area||'Karachi');
-    if (updates.vehicle?.model) {
-      $('profile-vehicle-card').innerHTML = `
-        <div style="font-size:1.8rem">${updates.vehicle.type==='bike'?'🏍️':'🚗'}</div>
-        <div>
-          <div style="font-weight:600;font-size:.9rem">${updates.vehicle.model} ${updates.vehicle.year}</div>
-          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">${updates.vehicle.plate} · ${updates.vehicle.color} · ${updates.vehicle.mileage} km/L</div>
-        </div>`;
-    }
-    showToast('✓ Profile saved!');
-  } catch(e) { showToast('Error saving: '+e.message,'err'); }
-  finally { if(btn){btn.disabled=false;btn.textContent='Save Changes';} }
-}
-
-// ════════════════════════════════════════
-//  RATING MODAL
-// ════════════════════════════════════════
-
-let currentRating = 0;
-let currentRatingRideId = null;
-let currentRatingDriverUid = null;
-
-function openRateModal(rideId, driverUid) {
-  currentRatingRideId = rideId;
-  currentRatingDriverUid = driverUid;
-  $('rate-modal').classList.add('open');
-}
-function closeRateModal() { $('rate-modal').classList.remove('open'); }
-function setRating(n) {
-  currentRating = n;
-  document.querySelectorAll('.sp').forEach((s,i)=>s.classList.toggle('lit',i<n));
-}
-
-async function submitRating() {
-  if (!currentRating) { showToast('Please pick a star rating.','err'); return; }
-  if (!requireAuth('rate a ride')) return;
-  const user = window._currentUser;
-  const comment = document.querySelector('#rate-modal textarea')?.value?.trim()||'';
-  const chips = Array.from(document.querySelectorAll('.rate-chip.on')).map(el=>el.textContent);
-
-  try {
-    if (FB() && currentRatingRideId) {
-      // Write review
-      await FB().addDoc(FB().collection(FB().db,'reviews'), {
-        rideId: currentRatingRideId, driverUid: currentRatingDriverUid,
-        raterUid: user.uid, raterName: user.displayName||user.email.split('@')[0],
-        rating: currentRating, comment, chips,
-        createdAt: FB().serverTimestamp(),
-      });
-      // Update driver's rating total
-      if (currentRatingDriverUid) {
-        await FB().updateDoc(FB().doc(FB().db,'users',currentRatingDriverUid), {
-          rating: FB().increment(currentRating), totalRatings: FB().increment(1)
-        });
-      }
-    }
-    closeRateModal();
-    showToast(`✓ ${currentRating}-star rating submitted!`);
-    currentRating=0; currentRatingRideId=null; currentRatingDriverUid=null;
-    document.querySelectorAll('.sp').forEach(s=>s.classList.remove('lit'));
-    document.querySelectorAll('.rate-chip.on').forEach(el=>el.classList.remove('on'));
-  } catch(e) { showToast('Error submitting rating: '+e.message,'err'); }
-}
-
-// ════════════════════════════════════════
-//  ROUTING
-// ════════════════════════════════════════
-
-function goHome() {
-  $('page-landing').classList.add('active');
-  $('page-app').classList.remove('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  $('nl-home').classList.add('active');
-}
-
-function showSection(s) {
-  $('page-landing').classList.remove('active');
-  $('page-app').classList.add('active');
-  document.querySelectorAll('.ap-section').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.sb-link').forEach(el=>el.classList.remove('active'));
-  const ap=$('ap-'+s), sl=$('sl-'+s);
-  if (ap) ap.classList.add('active');
-  if (sl) sl.classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  const m={find:'nl-find',offer:'nl-offer',myrides:'nl-rides',dashboard:'nl-dash'};
-  if(m[s]) $(m[s]).classList.add('active');
-  window.scrollTo(0,0);
-  if (s==='find') subscribeToRides();
-  if (s==='offer') offerCalc();
-  if (s==='myrides' && window._currentUser) switchMyTab('offered');
-}
-
-// ════════════════════════════════════════
-//  VEHICLE TYPE & FILTER HELPERS
-// ════════════════════════════════════════
-
-function setVehicleType(type) {
-  currentVehicleType = type;
-  const isBike = type==='bike';
-  $('vtype-car').classList.toggle('on',!isBike);
-  $('vtype-bike').classList.toggle('on',isBike);
-  $('car-fields').classList.toggle('hidden',isBike);
-  $('bike-fields').classList.toggle('hidden',!isBike);
-  document.querySelectorAll('.car-only').forEach(el=>el.classList.toggle('hidden',isBike));
-  document.querySelectorAll('.bike-only').forEach(el=>el.classList.toggle('hidden',!isBike));
-  $('vehicle-section-title').textContent = isBike?'🏍️ Bike Details':'🚗 Vehicle Details';
-  offerCalc();
-}
-
-function toggleFilter(el,k){
-  el.classList.toggle('on');
-  activeFilters.has(k)?activeFilters.delete(k):activeFilters.add(k);
-  if (window._loadedRides) renderRides(window._loadedRides);
-}
-
-function getFromVal(){const s=$('f-from');return s?.value==='__other__'?($('f-from-other')?.value?.trim()||''):s?.value||'';}
-function getToVal(){const s=$('f-to');return s?.value==='__other__'?($('f-to-other')?.value?.trim()||''):s?.value||'';}
-
-function handleFromChange(){const s=$('f-from');$('f-from-other').classList.toggle('hidden',s.value!=='__other__');if(s.value!=='__other__'&&window._loadedRides)renderRides(window._loadedRides);}
-function handleToChange(){const s=$('f-to');$('f-to-other').classList.toggle('hidden',s.value!=='__other__');if(s.value!=='__other__'&&window._loadedRides)renderRides(window._loadedRides);}
-function filterRides(){if(window._loadedRides)renderRides(window._loadedRides);}
-function handleOfferFrom(){const s=$('o-from');$('o-from-other').classList.toggle('hidden',s.value!=='__other__');offerCalc();}
-function handleOfferTo(){const s=$('o-to');$('o-to-other').classList.toggle('hidden',s.value!=='__other__');offerCalc();}
-function handleCarOther(){const s=$('o-car');$('o-car-other').classList.toggle('hidden',!s.value.includes('Other'));}
-function handleBikeOther(){const s=$('o-bike');$('o-bike-other').classList.toggle('hidden',!s.value.includes('Other'));}
-function handleProfileCarOther(){const s=$('p-car');$('p-car-other').classList.toggle('hidden',s.value!=='__other__');}
-function handleProfileAreaOther(){const s=$('p-area');$('p-area-other').classList.toggle('hidden',s.value!=='__other__');}
-function handleAuthAreaOther(){const s=$('au-area');$('au-area-other').classList.toggle('hidden',s.value!=='__other__');}
-
-// ════════════════════════════════════════
-//  OFFER CALC
-// ════════════════════════════════════════
-
-function getOfferFrom(){const s=$('o-from');return s?.value==='__other__'?($('o-from-other')?.value?.trim()||'PECHS'):s?.value||'PECHS';}
-function getOfferTo(){const s=$('o-to');return s?.value==='__other__'?($('o-to-other')?.value?.trim()||'I.I. Chundrigar (Downtown)'):s?.value||'I.I. Chundrigar (Downtown)';}
-
-function offerCalc(){
-  const from=getOfferFrom(),to=getOfferTo();
-  const isBike=currentVehicleType==='bike';
-  const mileage=parseFloat($( isBike?'o-mileage-bike':'o-mileage')?.value||(isBike?35:13));
-  const seats=parseInt($('o-seats')?.value||2);
-  const time=$('o-time')?.value||'08:00';
-  const [hh,mm]=time.split(':').map(Number);
-  const dist=(DIST[from]&&DIST[from][to])||12;
-  const trip=Math.round((dist/mileage)*PETROL);
-  const per=Math.round(trip/(seats+1));
-  const recover=per*seats;
-  const yours=trip-recover;
-  const arrM=Math.round(dist/28*60)+8;
-  const arrH=hh+Math.floor((mm+arrM)/60);
-  const arrMin=(mm+arrM)%60;
-  set('cp-dist',dist+' km'); set('cp-total','Rs.'+trip); set('cp-per','Rs.'+per);
-  set('cp-recover','Rs.'+recover); set('cp-yours','Rs.'+yours);
-  set('tp-t1',`${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}`);
-  set('tp-p1',from); set('tp-t2',`${arrH}:${arrMin.toString().padStart(2,'0')}`); set('tp-p2',to);
-}
-
-// ════════════════════════════════════════
-//  MY RIDES TABS
-// ════════════════════════════════════════
-
-function switchMyTab(t){
-  ['offered','joined','history'].forEach(tab=>{
-    $('my-'+tab)?.classList.add('hidden');
-    $('mrt-'+tab)?.classList.remove('active');
-  });
-  $('my-'+t)?.classList.remove('hidden');
-  $('mrt-'+t)?.classList.add('active');
-}
-
-// ════════════════════════════════════════
-//  SAVINGS CALCULATOR
-// ════════════════════════════════════════
-
-function calcUpdate(){
-  const dist=+$('c-d').value, mil=+$('c-m').value, pass=+$('c-p').value;
-  $('c-dv').textContent=dist+' km'; $('c-mv').textContent=mil+' km/L'; $('c-pv').textContent=pass;
-  const solo=Math.round((dist*2/mil)*PETROL*26);
-  const share=Math.round(solo/(pass+1)), save=solo-share;
-  $('c-solo').textContent='Rs.'+solo.toLocaleString(); $('c-share').textContent='Rs.'+share.toLocaleString();
-  $('c-save').textContent='Rs.'+save.toLocaleString(); $('c-year').textContent='Rs.'+(save*12).toLocaleString();
-}
-calcUpdate();
-
-// ════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════
-
-function showToast(msg,type=''){
-  const stack=$('toast-stack');
-  const t=document.createElement('div');
-  t.className='toast'+(type?' '+type:''); t.textContent=msg;
-  stack.appendChild(t);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
-  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3800);
-}
-
-// ════════════════════════════════════════
-//  FIREBASE MODULE AUTH STATE WIRING
-//  (called from the type="module" script above)
-// ════════════════════════════════════════
-
-window.updateNavForUser = updateNavForUser;
-window.loadUserProfile = loadUserProfile;
-window.subscribeToNotifications = subscribeToNotifications;
-window.subscribeToMyRides = subscribeToMyRides;
-
-// Re-export so the module script can call these
-// The module script calls: updateNavForUser, loadUserProfile, loadNotifications, loadMyRides
-// We wire them here:
-window.loadNotifications = subscribeToNotifications;
-window.loadMyRides = subscribeToMyRides;
-
-// ════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════
-
-// Rides only load when user navigates to Find Ride
-// Nothing loads on startup — clean slate
-window._loadedRides = [];
-offerCalc();
-
-function toggleMobileMenu() {
-  document.getElementById('mobile-nav').classList.toggle('open');
-}
-
+// Initial calc update
+document.addEventListener('DOMContentLoaded', calcUpdate);
 </script>
 </body>
 </html>
